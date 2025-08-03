@@ -116,11 +116,11 @@ struct SavingGoalRowView: View {
             }
             
             HStack {
-                Text("$\(goal.currentAmount, specifier: "%.2f")")
+                Text("\(dataManager.currencySymbol)\(goal.currentAmount, specifier: "%.2f")")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                 
-                Text("of $\(goal.targetAmount, specifier: "%.2f")")
+                Text("of \(dataManager.currencySymbol)\(goal.targetAmount, specifier: "%.2f")")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
@@ -143,7 +143,7 @@ struct SavingGoalRowView: View {
                     Spacer()
                     
                     if goal.remainingAmount > 0 {
-                        Text("Save $\(goal.dailySavingNeeded, specifier: "%.2f")/day")
+                        Text("Save \(dataManager.currencySymbol)\(goal.dailySavingNeeded, specifier: "%.2f")/day")
                             .font(.caption)
                             .foregroundColor(.orange)
                     }
@@ -175,7 +175,7 @@ struct GenericGoalRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Save $\(goal.targetAmount, specifier: "%.2f") this month")
+                Text("Save \(dataManager.currencySymbol)\(goal.targetAmount, specifier: "%.2f") this month")
                     .font(.headline)
                 
                 Spacer()
@@ -187,7 +187,7 @@ struct GenericGoalRowView: View {
             }
             
             HStack {
-                Text("Current surplus: $\(max(dataManager.getCurrentBalance(), 0), specifier: "%.2f")")
+                Text("Current surplus: \(dataManager.currencySymbol)\(max(dataManager.getCurrentBalance(), 0), specifier: "%.2f")")
                     .font(.subheadline)
                     .foregroundColor(dataManager.getCurrentBalance() >= 0 ? .green : .red)
                 
@@ -223,7 +223,7 @@ struct AddSavingGoalView: View {
                     TextField("Goal Name", text: $name)
                     
                     HStack {
-                        Text("$")
+                        Text(dataManager.currencySymbol)
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $targetAmount)
                             .keyboardType(.decimalPad)
@@ -279,7 +279,7 @@ struct AddGenericGoalView: View {
             Form {
                 Section(header: Text("Monthly Saving Goal"), footer: Text("This goal resets each month and tracks how much you want to save from your monthly surplus")) {
                     HStack {
-                        Text("$")
+                        Text(dataManager.currencySymbol)
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $targetAmount)
                             .keyboardType(.decimalPad)
@@ -341,7 +341,7 @@ struct EditSavingGoalView: View {
                         TextField("Goal Name", text: $name)
                         
                         HStack {
-                            Text("Target: $")
+                            Text("Target: \(dataManager.currencySymbol)")
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $targetAmount)
                                 .keyboardType(.decimalPad)
@@ -355,7 +355,7 @@ struct EditSavingGoalView: View {
                     
                     Section(header: Text("Progress")) {
                         HStack {
-                            Text("Current: $")
+                            Text("Current: \(dataManager.currencySymbol)")
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $currentAmount)
                                 .keyboardType(.decimalPad)
@@ -367,7 +367,7 @@ struct EditSavingGoalView: View {
                 } else {
                     Section(header: Text("Monthly Saving Goal")) {
                         HStack {
-                            Text("Target: $")
+                            Text("Target: \(dataManager.currencySymbol)")
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $targetAmount)
                                 .keyboardType(.decimalPad)

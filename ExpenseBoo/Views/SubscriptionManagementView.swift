@@ -100,7 +100,7 @@ struct SubscriptionRowView: View {
             Spacer()
             
             VStack(alignment: .trailing) {
-                Text("$\(subscription.amount, specifier: "%.2f")")
+                Text("\(dataManager.currencySymbol)\(subscription.amount, specifier: "%.2f")")
                     .font(.body)
                     .fontWeight(.semibold)
                     .foregroundColor(subscription.isActive ? .red : .secondary)
@@ -137,7 +137,7 @@ struct AddSubscriptionView: View {
                     TextField("Subscription Name", text: $name)
                     
                     HStack {
-                        Text("$")
+                        Text(dataManager.currencySymbol)
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
@@ -229,7 +229,7 @@ struct EditSubscriptionView: View {
                     TextField("Subscription Name", text: $name)
                     
                     HStack {
-                        Text("$")
+                        Text(dataManager.currencySymbol)
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
