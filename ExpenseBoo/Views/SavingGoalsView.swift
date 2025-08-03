@@ -227,9 +227,12 @@ struct AddSavingGoalView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $targetAmount)
                             .keyboardType(.decimalPad)
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                        targetAmount = targetAmount.replacingOccurrences(of: ",", with: ".")
+                            .onChange(of: targetAmount) { newValue in
+                                let filtered = newValue.replacingOccurrences(of: ",", with: ".")
+                                if filtered != targetAmount {
+                                    targetAmount = filtered
+                                }
+                            }
                     }
                     
                     DatePicker("Target Date", selection: $targetDate, in: Date()..., displayedComponents: .date)
@@ -283,9 +286,12 @@ struct AddGenericGoalView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $targetAmount)
                             .keyboardType(.decimalPad)
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                        targetAmount = targetAmount.replacingOccurrences(of: ",", with: ".")
+                            .onChange(of: targetAmount) { newValue in
+                                let filtered = newValue.replacingOccurrences(of: ",", with: ".")
+                                if filtered != targetAmount {
+                                    targetAmount = filtered
+                                }
+                            }
                     }
                 }
             }
@@ -345,9 +351,12 @@ struct EditSavingGoalView: View {
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $targetAmount)
                                 .keyboardType(.decimalPad)
-                        }
-                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                            targetAmount = targetAmount.replacingOccurrences(of: ",", with: ".")
+                                .onChange(of: targetAmount) { newValue in
+                                    let filtered = newValue.replacingOccurrences(of: ",", with: ".")
+                                    if filtered != targetAmount {
+                                        targetAmount = filtered
+                                    }
+                                }
                         }
                         
                         DatePicker("Target Date", selection: $targetDate, in: Date()..., displayedComponents: .date)
@@ -359,9 +368,12 @@ struct EditSavingGoalView: View {
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $currentAmount)
                                 .keyboardType(.decimalPad)
-                        }
-                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                            currentAmount = currentAmount.replacingOccurrences(of: ",", with: ".")
+                                .onChange(of: currentAmount) { newValue in
+                                    let filtered = newValue.replacingOccurrences(of: ",", with: ".")
+                                    if filtered != currentAmount {
+                                        currentAmount = filtered
+                                    }
+                                }
                         }
                     }
                 } else {
@@ -371,9 +383,12 @@ struct EditSavingGoalView: View {
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $targetAmount)
                                 .keyboardType(.decimalPad)
-                        }
-                        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                            targetAmount = targetAmount.replacingOccurrences(of: ",", with: ".")
+                                .onChange(of: targetAmount) { newValue in
+                                    let filtered = newValue.replacingOccurrences(of: ",", with: ".")
+                                    if filtered != targetAmount {
+                                        targetAmount = filtered
+                                    }
+                                }
                         }
                     }
                 }

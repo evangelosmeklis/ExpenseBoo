@@ -115,9 +115,12 @@ struct EditIncomeView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                        amount = amount.replacingOccurrences(of: ",", with: ".")
+                            .onChange(of: amount) { newValue in
+                                let filtered = newValue.replacingOccurrences(of: ",", with: ".")
+                                if filtered != amount {
+                                    amount = filtered
+                                }
+                            }
                     }
                     
                     DatePicker("Date", selection: $selectedDate, displayedComponents: .date)

@@ -16,6 +16,10 @@ struct ExpensesView: View {
         }
     }
     
+    var groupedExpensesByBudgetPeriod: [(key: String, value: [Expense])] {
+        return dataManager.getExpensesGroupedByBudgetPeriod()
+    }
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -43,10 +47,22 @@ struct ExpensesView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
-                        ForEach(groupedExpenses, id: \.key) { group in
-                            Section(header: Text(group.key)) {
-                                ForEach(group.value) { expense in
-                                    ExpenseRowView(expense: expense)
+                        if selectedPeriod == 0 {
+                            // Current month - group by day
+                            ForEach(groupedExpenses, id: \.key) { group in
+                                Section(header: Text(group.key)) {
+                                    ForEach(group.value) { expense in
+                                        ExpenseRowView(expense: expense)
+                                    }
+                                }
+                            }
+                        } else {
+                            // All time - group by budget period
+                            ForEach(groupedExpensesByBudgetPeriod, id: \.key) { group in
+                                Section(header: Text("Budget Period: \(group.key)")) {
+                                    ForEach(group.value.sorted { $0.date > $1.date }) { expense in
+                                        ExpenseRowView(expense: expense)
+                                    }
                                 }
                             }
                         }
@@ -90,6 +106,7 @@ struct ExpensesView: View {
 struct ExpenseRowView: View {
     @EnvironmentObject var dataManager: DataManager
     let expense: Expense
+    @State private var showingEditExpense = false
     
     var category: Category? {
         dataManager.getCategoryById(expense.categoryId)
@@ -132,6 +149,13 @@ struct ExpenseRowView: View {
                 .foregroundColor(.red)
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showingEditExpense = true
+        }
+        .sheet(isPresented: $showingEditExpense) {
+            EditExpenseView(expense: expense)
+        }
     }
 }
 

@@ -17,10 +17,13 @@ struct AddIncomeView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
-                    }
-                    .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
-                        // Handle decimal separator differences (comma vs period)
-                        amount = amount.replacingOccurrences(of: ",", with: ".")
+                            .onChange(of: amount) { newValue in
+                                // Clean and format the input to handle decimals properly
+                                let filtered = newValue.replacingOccurrences(of: ",", with: ".")
+                                if filtered != amount {
+                                    amount = filtered
+                                }
+                            }
                     }
                     
                     DatePicker("Date", selection: $selectedDate, displayedComponents: .date)

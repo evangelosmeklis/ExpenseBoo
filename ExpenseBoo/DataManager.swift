@@ -256,4 +256,70 @@ class DataManager: ObservableObject {
         incomes.removeAll { $0.id == income.id }
         saveData()
     }
+    
+    func updateExpense(_ expense: Expense) {
+        if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
+            expenses[index] = expense
+            saveData()
+        }
+    }
+    
+    func deleteExpense(_ expense: Expense) {
+        expenses.removeAll { $0.id == expense.id }
+        saveData()
+    }
+    
+    func getBudgetPeriodForDate(_ date: Date) -> Date {
+        let calendar = Calendar.current
+        
+        switch settings.resetType {
+        case .payDay:
+            let day = calendar.component(.day, from: date)
+            let month = calendar.component(.month, from: date)
+            let year = calendar.component(.year, from: date)
+            
+            if day >= settings.payDay {
+                // This expense belongs to the period starting this month
+                return calendar.date(from: DateComponents(year: year, month: month, day: settings.payDay)) ?? date
+            } else {
+                // This expense belongs to the period starting last month
+                let previousMonth = calendar.date(byAdding: .month, value: -1, to: date) ?? date
+                let prevMonth = calendar.component(.month, from: previousMonth)
+                let prevYear = calendar.component(.year, from: previousMonth)
+                return calendar.date(from: DateComponents(year: prevYear, month: prevMonth, day: settings.payDay)) ?? date
+            }
+            
+        case .monthlyDate:
+            let day = calendar.component(.day, from: date)
+            let month = calendar.component(.month, from: date)
+            let year = calendar.component(.year, from: date)
+            
+            if day >= settings.monthlyResetDate {
+                // This expense belongs to the period starting this month
+                return calendar.date(from: DateComponents(year: year, month: month, day: settings.monthlyResetDate)) ?? date
+            } else {
+                // This expense belongs to the period starting last month
+                let previousMonth = calendar.date(byAdding: .month, value: -1, to: date) ?? date
+                let prevMonth = calendar.component(.month, from: previousMonth)
+                let prevYear = calendar.component(.year, from: previousMonth)
+                return calendar.date(from: DateComponents(year: prevYear, month: prevMonth, day: settings.monthlyResetDate)) ?? date
+            }
+        }
+    }
+    
+    func getExpensesGroupedByBudgetPeriod() -> [(key: String, value: [Expense])] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        
+        let grouped = Dictionary(grouping: expenses) { expense in
+            let periodStart = getBudgetPeriodForDate(expense.date)
+            return formatter.string(from: periodStart)
+        }
+        
+        return grouped.sorted { first, second in
+            let firstDate = formatter.date(from: first.key) ?? Date.distantPast
+            let secondDate = formatter.date(from: second.key) ?? Date.distantPast
+            return firstDate > secondDate
+        }
+    }
 }
