@@ -61,7 +61,7 @@ struct IncomeRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("$\(income.amount, specifier: "%.2f")")
+                Text("\(dataManager.currencySymbol)\(income.amount, specifier: "%.2f")")
                     .font(.headline)
                     .foregroundColor(.green)
                 
@@ -111,7 +111,7 @@ struct EditIncomeView: View {
             Form {
                 Section(header: Text("Income Details")) {
                     HStack {
-                        Text("$")
+                        Text(dataManager.currencySymbol)
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)

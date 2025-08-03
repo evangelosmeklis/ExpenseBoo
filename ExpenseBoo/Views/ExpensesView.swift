@@ -126,7 +126,7 @@ struct ExpenseRowView: View {
             
             Spacer()
             
-            Text("$\(expense.amount, specifier: "%.2f")")
+            Text("\(dataManager.currencySymbol)\(expense.amount, specifier: "%.2f")")
                 .font(.body)
                 .fontWeight(.semibold)
                 .foregroundColor(.red)

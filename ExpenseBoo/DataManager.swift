@@ -202,6 +202,10 @@ class DataManager: ObservableObject {
         return categories.first { $0.id == id }
     }
     
+    var currencySymbol: String {
+        return settings.currency.symbol
+    }
+    
     func addSubscription(_ subscription: Subscription) {
         subscriptions.append(subscription)
         saveData()

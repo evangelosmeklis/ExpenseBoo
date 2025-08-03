@@ -118,6 +118,22 @@ struct SettingsView: View {
                         .font(.caption)
                 }
                 
+                Section(header: Text("Display")) {
+                    HStack {
+                        Text("Currency")
+                        Spacer()
+                        Picker("Currency", selection: $tempSettings.currency) {
+                            ForEach(Currency.allCases, id: \.self) { currency in
+                                HStack {
+                                    Text(currency.symbol)
+                                    Text(currency.displayName)
+                                }.tag(currency)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                }
+                
                 Section(header: Text("Notifications")) {
                     Toggle("Enable Notifications", isOn: $tempSettings.notificationsEnabled)
                     

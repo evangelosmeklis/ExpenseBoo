@@ -13,7 +13,7 @@ struct AddIncomeView: View {
             Form {
                 Section(header: Text("Income Details")) {
                     HStack {
-                        Text("$")
+                        Text(dataManager.currencySymbol)
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
