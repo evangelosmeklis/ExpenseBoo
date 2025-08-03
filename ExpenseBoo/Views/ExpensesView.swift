@@ -4,31 +4,95 @@ struct ExpensesView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var showingAddExpense = false
     @State private var selectedPeriod = 0
+    @State private var startDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+    @State private var endDate = Date()
+    @State private var showingDatePicker = false
     
     var filteredExpenses: [Expense] {
         switch selectedPeriod {
         case 0:
             return dataManager.getCurrentMonthExpenses().sorted { $0.date > $1.date }
         case 1:
-            return getAllExpenses().sorted { $0.date > $1.date }
+            return getExpensesInDateRange().sorted { $0.date > $1.date }
         default:
             return []
         }
+    }
+    
+    private func getExpensesInDateRange() -> [Expense] {
+        return dataManager.expenses.filter { expense in
+            expense.date >= startDate && expense.date <= endDate
+        }
+    }
+    
+    var expenseTotal: Double {
+        return filteredExpenses.reduce(0) { $0 + $1.amount }
     }
     
     var groupedExpensesByBudgetPeriod: [(key: String, value: [Expense])] {
         return dataManager.getExpensesGroupedByBudgetPeriod()
     }
     
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }
+    
+    private var groupedExpensesForDateRange: [(key: String, value: [Expense])] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d, yyyy"
+        
+        let grouped = Dictionary(grouping: getExpensesInDateRange()) { expense in
+            formatter.string(from: expense.date)
+        }
+        
+        return grouped.sorted { first, second in
+            let firstDate = formatter.date(from: first.key) ?? Date.distantPast
+            let secondDate = formatter.date(from: second.key) ?? Date.distantPast
+            return firstDate > secondDate
+        }
+    }
+    
     var body: some View {
         NavigationView {
             VStack {
-                Picker("Period", selection: $selectedPeriod) {
-                    Text("This Month").tag(0)
-                    Text("All Time").tag(1)
+                VStack(spacing: 12) {
+                    Picker("Period", selection: $selectedPeriod) {
+                        Text("This Month").tag(0)
+                        Text("Date Range").tag(1)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+                    
+                    if selectedPeriod == 1 {
+                        HStack {
+                            Button(action: { showingDatePicker = true }) {
+                                Text("From: \(startDate, formatter: dateFormatter) - To: \(endDate, formatter: dateFormatter)")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                                    .padding(.horizontal)
+                            }
+                            Spacer()
+                        }
+                    }
+                    
+                    // Expense Total
+                    HStack {
+                        Text("Total:")
+                            .font(.headline)
+                        Spacer()
+                        Text("\(dataManager.currencySymbol)\(expenseTotal, specifier: "%.2f")")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.red)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
                 }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
                 
                 if filteredExpenses.isEmpty {
                     VStack(spacing: 20) {
@@ -57,10 +121,10 @@ struct ExpensesView: View {
                                 }
                             }
                         } else {
-                            // All time - group by budget period
-                            ForEach(groupedExpensesByBudgetPeriod, id: \.key) { group in
-                                Section(header: Text("Budget Period: \(group.key)")) {
-                                    ForEach(group.value.sorted { $0.date > $1.date }) { expense in
+                            // Date range - group by day
+                            ForEach(groupedExpensesForDateRange, id: \.key) { group in
+                                Section(header: Text(group.key)) {
+                                    ForEach(group.value) { expense in
                                         ExpenseRowView(expense: expense)
                                     }
                                 }
@@ -79,6 +143,9 @@ struct ExpensesView: View {
             }
             .sheet(isPresented: $showingAddExpense) {
                 AddExpenseView()
+            }
+            .sheet(isPresented: $showingDatePicker) {
+                DateRangePickerView(startDate: $startDate, endDate: $endDate)
             }
         }
     }
@@ -155,6 +222,38 @@ struct ExpenseRowView: View {
         }
         .sheet(isPresented: $showingEditExpense) {
             EditExpenseView(expense: expense)
+        }
+    }
+}
+
+struct DateRangePickerView: View {
+    @Binding var startDate: Date
+    @Binding var endDate: Date
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Select Date Range")) {
+                    DatePicker("From", selection: $startDate, displayedComponents: .date)
+                    DatePicker("To", selection: $endDate, in: startDate..., displayedComponents: .date)
+                }
+            }
+            .navigationTitle("Date Range")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
         }
     }
 }

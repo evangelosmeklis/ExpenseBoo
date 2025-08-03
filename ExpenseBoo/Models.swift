@@ -109,7 +109,9 @@ struct SavingGoal: Identifiable, Codable {
     
     var daysRemaining: Int {
         let calendar = Calendar.current
-        let days = calendar.dateComponents([.day], from: Date(), to: targetDate).day ?? 0
+        let startOfToday = calendar.startOfDay(for: Date())
+        let startOfTargetDate = calendar.startOfDay(for: targetDate)
+        let days = calendar.dateComponents([.day], from: startOfToday, to: startOfTargetDate).day ?? 0
         return max(days, 0)
     }
     

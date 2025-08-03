@@ -124,10 +124,8 @@ struct SettingsView: View {
                         Spacer()
                         Picker("Currency", selection: $tempSettings.currency) {
                             ForEach(Currency.allCases, id: \.self) { currency in
-                                HStack {
-                                    Text(currency.symbol)
-                                    Text(currency.displayName)
-                                }.tag(currency)
+                                Text("\(currency.symbol) \(currency.displayName)")
+                                    .tag(currency)
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
