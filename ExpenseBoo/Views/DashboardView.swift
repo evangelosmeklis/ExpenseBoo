@@ -160,7 +160,11 @@ struct SavingGoalsSection: View {
     @EnvironmentObject var dataManager: DataManager
     
     var activeGoals: [SavingGoal] {
-        Array(dataManager.savingGoals.filter { $0.targetDate >= Date() || $0.isGeneric }.prefix(3))
+        Array(dataManager.savingGoals.filter { $0.targetDate >= Date() && !$0.isGeneric }.prefix(3))
+    }
+    
+    var genericGoal: SavingGoal? {
+        dataManager.savingGoals.first { $0.isGeneric }
     }
     
     var body: some View {
@@ -174,15 +178,21 @@ struct SavingGoalsSection: View {
                     .foregroundColor(.blue)
             }
             
-            if activeGoals.isEmpty {
-                Text("No active saving goals")
-                    .foregroundColor(.secondary)
-                    .padding()
-            } else {
-                VStack(spacing: 8) {
+            VStack(spacing: 8) {
+                // Show generic goal first if it exists
+                if let genericGoal = genericGoal {
+                    GenericGoalRowView(goal: genericGoal)
+                }
+                
+                // Show specific goals
+                if !activeGoals.isEmpty {
                     ForEach(activeGoals) { goal in
                         SavingGoalRowView(goal: goal)
                     }
+                } else if genericGoal == nil {
+                    Text("No active saving goals")
+                        .foregroundColor(.secondary)
+                        .padding()
                 }
             }
         }

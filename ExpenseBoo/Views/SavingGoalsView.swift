@@ -116,7 +116,7 @@ struct SavingGoalRowView: View {
             }
             
             HStack {
-                Text("\(dataManager.currencySymbol)\(goal.currentAmount, specifier: "%.2f")")
+                Text("\(dataManager.currencySymbol)\(goal.totalWithContributions, specifier: "%.2f")")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                 
@@ -129,6 +129,12 @@ struct SavingGoalRowView: View {
                 Text("\(Int(goal.progress * 100))%")
                     .font(.caption)
                     .foregroundColor(.secondary)
+            }
+            
+            if let currentMonthContribution = goal.monthlyContributions[dataManager.getCurrentMonthKey()], currentMonthContribution > 0 {
+                Text("This month: +\(dataManager.currencySymbol)\(currentMonthContribution, specifier: "%.2f")")
+                    .font(.caption)
+                    .foregroundColor(.blue)
             }
             
             ProgressView(value: goal.progress)

@@ -88,6 +88,7 @@ struct SavingGoal: Identifiable, Codable {
     var currentAmount: Double
     var targetDate: Date
     var isGeneric: Bool
+    var monthlyContributions: [String: Double]
     
     init(name: String, targetAmount: Double, currentAmount: Double = 0, targetDate: Date, isGeneric: Bool = false) {
         self.id = UUID()
@@ -96,15 +97,24 @@ struct SavingGoal: Identifiable, Codable {
         self.currentAmount = currentAmount
         self.targetDate = targetDate
         self.isGeneric = isGeneric
+        self.monthlyContributions = [:]
+    }
+    
+    var totalContributions: Double {
+        return monthlyContributions.values.reduce(0, +)
+    }
+    
+    var totalWithContributions: Double {
+        return currentAmount + totalContributions
     }
     
     var progress: Double {
         guard targetAmount > 0 else { return 0 }
-        return min(currentAmount / targetAmount, 1.0)
+        return min(totalWithContributions / targetAmount, 1.0)
     }
     
     var remainingAmount: Double {
-        return max(targetAmount - currentAmount, 0)
+        return max(targetAmount - totalWithContributions, 0)
     }
     
     var daysRemaining: Int {
