@@ -233,7 +233,7 @@ struct AddSavingGoalView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $targetAmount)
                             .keyboardType(.decimalPad)
-                            .onChange(of: targetAmount) { newValue in
+                            .onChange(of: targetAmount) { oldValue, newValue in
                                 let filtered = newValue.replacingOccurrences(of: ",", with: ".")
                                 if filtered != targetAmount {
                                     targetAmount = filtered
@@ -292,7 +292,7 @@ struct AddGenericGoalView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $targetAmount)
                             .keyboardType(.decimalPad)
-                            .onChange(of: targetAmount) { newValue in
+                            .onChange(of: targetAmount) { oldValue, newValue in
                                 let filtered = newValue.replacingOccurrences(of: ",", with: ".")
                                 if filtered != targetAmount {
                                     targetAmount = filtered
@@ -357,7 +357,7 @@ struct EditSavingGoalView: View {
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $targetAmount)
                                 .keyboardType(.decimalPad)
-                                .onChange(of: targetAmount) { newValue in
+                                .onChange(of: targetAmount) { oldValue, newValue in
                                     let filtered = newValue.replacingOccurrences(of: ",", with: ".")
                                     if filtered != targetAmount {
                                         targetAmount = filtered
@@ -374,7 +374,7 @@ struct EditSavingGoalView: View {
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $currentAmount)
                                 .keyboardType(.decimalPad)
-                                .onChange(of: currentAmount) { newValue in
+                                .onChange(of: currentAmount) { oldValue, newValue in
                                     let filtered = newValue.replacingOccurrences(of: ",", with: ".")
                                     if filtered != currentAmount {
                                         currentAmount = filtered
@@ -389,7 +389,7 @@ struct EditSavingGoalView: View {
                                 .foregroundColor(.secondary)
                             TextField("0.00", text: $targetAmount)
                                 .keyboardType(.decimalPad)
-                                .onChange(of: targetAmount) { newValue in
+                                .onChange(of: targetAmount) { oldValue, newValue in
                                     let filtered = newValue.replacingOccurrences(of: ",", with: ".")
                                     if filtered != targetAmount {
                                         targetAmount = filtered

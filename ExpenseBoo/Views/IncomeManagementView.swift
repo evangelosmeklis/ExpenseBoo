@@ -115,7 +115,7 @@ struct EditIncomeView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
-                            .onChange(of: amount) { newValue in
+                            .onChange(of: amount) { oldValue, newValue in
                                 let filtered = newValue.replacingOccurrences(of: ",", with: ".")
                                 if filtered != amount {
                                     amount = filtered

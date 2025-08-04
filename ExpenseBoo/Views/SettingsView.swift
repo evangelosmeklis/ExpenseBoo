@@ -168,8 +168,8 @@ struct SettingsView: View {
                 tempSettings = dataManager.settings
                 dataManager.addSubscriptionExpenses()
             }
-            .onChange(of: tempSettings) {
-                dataManager.updateSettings(tempSettings)
+            .onChange(of: tempSettings) { oldValue, newValue in
+                dataManager.updateSettings(newValue)
             }
             .sheet(isPresented: $showingCategoryManagement) {
                 CategoryManagementView()

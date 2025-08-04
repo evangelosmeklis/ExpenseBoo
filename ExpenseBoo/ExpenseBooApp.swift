@@ -21,10 +21,10 @@ struct ExpenseBooApp: App {
                     notificationManager.updateNotifications(dataManager: dataManager)
                     dataManager.addSubscriptionExpenses()
                 }
-                .onChange(of: dataManager.settings.notificationsEnabled) {
+                .onChange(of: dataManager.settings.notificationsEnabled) { oldValue, newValue in
                     notificationManager.updateNotifications(dataManager: dataManager)
                 }
-                .onChange(of: dataManager.settings.dailyNotificationTime) {
+                .onChange(of: dataManager.settings.dailyNotificationTime) { oldValue, newValue in
                     notificationManager.updateNotifications(dataManager: dataManager)
                 }
         }

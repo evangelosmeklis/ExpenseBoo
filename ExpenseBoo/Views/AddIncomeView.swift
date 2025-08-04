@@ -17,7 +17,7 @@ struct AddIncomeView: View {
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
                             .keyboardType(.decimalPad)
-                            .onChange(of: amount) { newValue in
+                            .onChange(of: amount) { oldValue, newValue in
                                 // Clean and format the input to handle decimals properly
                                 let filtered = newValue.replacingOccurrences(of: ",", with: ".")
                                 if filtered != amount {
