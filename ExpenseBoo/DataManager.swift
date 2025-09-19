@@ -7,13 +7,15 @@ class DataManager: ObservableObject {
     @Published var incomes: [Income] = []
     @Published var investments: [Investment] = []
     @Published var subscriptions: [Subscription] = []
+    @Published var manualPLs: [ManualPL] = []
     @Published var settings: Settings = Settings()
-    
+
     private let expensesKey = "expenses"
     private let categoriesKey = "categories"
     private let incomesKey = "incomes"
     private let investmentsKey = "investments"
     private let subscriptionsKey = "subscriptions"
+    private let manualPLsKey = "manualPLs"
     private let settingsKey = "settings"
     
     init() {
@@ -47,7 +49,12 @@ class DataManager: ObservableObject {
            let decodedSubscriptions = try? JSONDecoder().decode([Subscription].self, from: subscriptionsData) {
             subscriptions = decodedSubscriptions
         }
-        
+
+        if let manualPLsData = UserDefaults.standard.data(forKey: manualPLsKey),
+           let decodedManualPLs = try? JSONDecoder().decode([ManualPL].self, from: manualPLsData) {
+            manualPLs = decodedManualPLs
+        }
+
         if let settingsData = UserDefaults.standard.data(forKey: settingsKey),
            let decodedSettings = try? JSONDecoder().decode(Settings.self, from: settingsData) {
             settings = decodedSettings
@@ -74,7 +81,11 @@ class DataManager: ObservableObject {
         if let subscriptionsData = try? JSONEncoder().encode(subscriptions) {
             UserDefaults.standard.set(subscriptionsData, forKey: subscriptionsKey)
         }
-        
+
+        if let manualPLsData = try? JSONEncoder().encode(manualPLs) {
+            UserDefaults.standard.set(manualPLsData, forKey: manualPLsKey)
+        }
+
         if let settingsData = try? JSONEncoder().encode(settings) {
             UserDefaults.standard.set(settingsData, forKey: settingsKey)
         }
@@ -302,6 +313,19 @@ class DataManager: ObservableObject {
         }
     }
 
+    func convertExpenseToInvestment(_ expense: Expense) {
+        let investment = Investment(
+            amount: expense.amount,
+            comment: expense.comment,
+            date: expense.date,
+            categoryId: expense.categoryId
+        )
+
+        investments.append(investment)
+        expenses.removeAll { $0.id == expense.id }
+        saveData()
+    }
+
     // MARK: - Stats Functions
     func getAvailableYears() -> [Int] {
         let allDates = expenses.map { $0.date } + incomes.map { $0.date } + investments.map { $0.date }
@@ -334,6 +358,18 @@ class DataManager: ObservableObject {
         let totalIncome = monthIncomes.reduce(0) { $0 + $1.amount }
         let totalInvestments = monthInvestments.reduce(0) { $0 + $1.amount }
 
+        // Check for manual P/L entry for this month
+        if let manualPL = manualPLs.first(where: { $0.month == month && $0.year == year }) {
+            return MonthlyStats(
+                month: month,
+                year: year,
+                income: manualPL.effectiveIncome,
+                expenses: manualPL.effectiveExpenses,
+                investments: manualPL.investments,
+                profitLoss: manualPL.effectiveProfitLoss
+            )
+        }
+
         let profitLoss = totalIncome - totalExpenses
 
         return MonthlyStats(
@@ -343,6 +379,52 @@ class DataManager: ObservableObject {
             expenses: totalExpenses,
             investments: totalInvestments,
             profitLoss: profitLoss
+        )
+    }
+
+    // MARK: - Manual P/L Functions
+    func addManualPL(_ manualPL: ManualPL) {
+        // Remove existing manual entry for same month/year
+        manualPLs.removeAll { $0.month == manualPL.month && $0.year == manualPL.year }
+        manualPLs.append(manualPL)
+        saveData()
+    }
+
+    func deleteManualPL(_ manualPL: ManualPL) {
+        manualPLs.removeAll { $0.id == manualPL.id }
+        saveData()
+    }
+
+    func getManualPL(for month: Int, year: Int) -> ManualPL? {
+        return manualPLs.first { $0.month == month && $0.year == year }
+    }
+
+    // MARK: - Yearly Statistics
+    func getYearlyStats(for year: Int) -> YearlyStats {
+        let monthlyStats = getMonthlyStats(for: year)
+
+        let totalIncome = monthlyStats.reduce(0) { $0 + $1.income }
+        let totalExpenses = monthlyStats.reduce(0) { $0 + $1.expenses }
+        let totalInvestments = monthlyStats.reduce(0) { $0 + $1.investments }
+        let totalProfitLoss = monthlyStats.reduce(0) { $0 + $1.profitLoss }
+
+        let statsWithData = monthlyStats.filter { $0.income > 0 || $0.expenses > 0 || $0.profitLoss != 0 }
+        let averageMonthlyPL = statsWithData.isEmpty ? 0 : totalProfitLoss / Double(statsWithData.count)
+
+        let bestMonth = monthlyStats.max(by: { $0.profitLoss < $1.profitLoss })
+        let worstMonth = monthlyStats.min(by: { $0.profitLoss < $1.profitLoss })
+
+        return YearlyStats(
+            year: year,
+            totalIncome: totalIncome,
+            totalExpenses: totalExpenses,
+            totalInvestments: totalInvestments,
+            totalProfitLoss: totalProfitLoss,
+            averageMonthlyPL: averageMonthlyPL,
+            bestMonth: bestMonth?.monthName ?? "N/A",
+            worstMonth: worstMonth?.monthName ?? "N/A",
+            bestMonthPL: bestMonth?.profitLoss ?? 0,
+            worstMonthPL: worstMonth?.profitLoss ?? 0
         )
     }
 }

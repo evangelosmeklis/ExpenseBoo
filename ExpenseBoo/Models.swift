@@ -194,3 +194,58 @@ struct MonthlyStats: Identifiable {
         return formatter.string(from: date)
     }
 }
+
+struct ManualPL: Identifiable, Codable {
+    let id: UUID
+    let month: Int
+    let year: Int
+    let profitLoss: Double?  // For direct P/L entry
+    let income: Double?      // For separate income entry
+    let expenses: Double?    // For separate expense entry
+    let investments: Double
+    let note: String
+
+    init(month: Int, year: Int, profitLoss: Double? = nil, income: Double? = nil, expenses: Double? = nil, investments: Double = 0, note: String = "") {
+        self.id = UUID()
+        self.month = month
+        self.year = year
+        self.profitLoss = profitLoss
+        self.income = income
+        self.expenses = expenses
+        self.investments = investments
+        self.note = note
+    }
+
+    // Computed property to get the effective P/L
+    var effectiveProfitLoss: Double {
+        if let directPL = profitLoss {
+            return directPL
+        } else {
+            let incomeAmount = income ?? 0
+            let expenseAmount = expenses ?? 0
+            return incomeAmount - expenseAmount
+        }
+    }
+
+    // Computed properties for display
+    var effectiveIncome: Double {
+        return income ?? 0
+    }
+
+    var effectiveExpenses: Double {
+        return expenses ?? 0
+    }
+}
+
+struct YearlyStats {
+    let year: Int
+    let totalIncome: Double
+    let totalExpenses: Double
+    let totalInvestments: Double
+    let totalProfitLoss: Double
+    let averageMonthlyPL: Double
+    let bestMonth: String
+    let worstMonth: String
+    let bestMonthPL: Double
+    let worstMonthPL: Double
+}

@@ -23,7 +23,7 @@ struct ContentView: View {
             ExpensesView()
                 .tabItem {
                     Image(systemName: "list.bullet")
-                    Text("Expenses")
+                    Text("P/L")
                 }
                 .tag(1)
 
