@@ -19,6 +19,7 @@ class DataManager: ObservableObject {
     init() {
         loadData()
         createDefaultCategories()
+        fixExistingSubscriptionDates()
     }
     
     func loadData() {
@@ -136,11 +137,12 @@ class DataManager: ObservableObject {
     }
     
     func getCurrentMonthExpenses() -> [Expense] {
+        let calendar = Calendar.current
         let now = Date()
-        let startOfPeriod = getStartOfCurrentPeriod()
-        
+        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
+
         return expenses.filter { expense in
-            expense.date >= startOfPeriod && expense.date <= now
+            expense.date >= startOfMonth && expense.date <= now
         }
     }
     
@@ -150,11 +152,12 @@ class DataManager: ObservableObject {
     }
 
     func getCurrentMonthInvestments() -> [Investment] {
+        let calendar = Calendar.current
         let now = Date()
-        let startOfPeriod = getStartOfCurrentPeriod()
+        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
 
         return investments.filter { investment in
-            investment.date >= startOfPeriod && investment.date <= now
+            investment.date >= startOfMonth && investment.date <= now
         }
     }
 
@@ -163,46 +166,15 @@ class DataManager: ObservableObject {
     }
 
     private func getCurrentPeriodIncomes() -> [Income] {
-        let startOfPeriod = getStartOfCurrentPeriod()
+        let calendar = Calendar.current
         let now = Date()
-        
+        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
+
         return incomes.filter { income in
-            income.date >= startOfPeriod && income.date <= now
+            income.date >= startOfMonth && income.date <= now
         }
     }
     
-    private func getStartOfCurrentPeriod() -> Date {
-        let calendar = Calendar.current
-        let now = Date()
-        
-        switch settings.resetType {
-        case .payDay:
-            let currentDay = calendar.component(.day, from: now)
-            if currentDay >= settings.payDay {
-                return calendar.date(from: DateComponents(year: calendar.component(.year, from: now),
-                                                         month: calendar.component(.month, from: now),
-                                                         day: settings.payDay)) ?? now
-            } else {
-                let previousMonth = calendar.date(byAdding: .month, value: -1, to: now) ?? now
-                return calendar.date(from: DateComponents(year: calendar.component(.year, from: previousMonth),
-                                                         month: calendar.component(.month, from: previousMonth),
-                                                         day: settings.payDay)) ?? now
-            }
-            
-        case .monthlyDate:
-            let currentDay = calendar.component(.day, from: now)
-            if currentDay >= settings.monthlyResetDate {
-                return calendar.date(from: DateComponents(year: calendar.component(.year, from: now),
-                                                         month: calendar.component(.month, from: now),
-                                                         day: settings.monthlyResetDate)) ?? now
-            } else {
-                let previousMonth = calendar.date(byAdding: .month, value: -1, to: now) ?? now
-                return calendar.date(from: DateComponents(year: calendar.component(.year, from: previousMonth),
-                                                         month: calendar.component(.month, from: previousMonth),
-                                                         day: settings.monthlyResetDate)) ?? now
-            }
-        }
-    }
     
     func getCurrentBalance() -> Double {
         let totalIncome = getCurrentMonthIncome()
@@ -237,26 +209,52 @@ class DataManager: ObservableObject {
     }
     
     func addSubscriptionExpenses() {
-        let startOfPeriod = getStartOfCurrentPeriod()
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
         let activeSubscriptions = subscriptions.filter { $0.isActive && $0.startDate <= Date() }
-        
+
         for subscription in activeSubscriptions {
-            let hasExpenseThisPeriod = expenses.contains { expense in
+            let hasExpenseThisMonth = expenses.contains { expense in
                 expense.comment.contains("Subscription: \(subscription.name)") &&
-                expense.date >= startOfPeriod
+                expense.date >= startOfMonth
             }
-            
-            if !hasExpenseThisPeriod {
+
+            if !hasExpenseThisMonth {
                 let subscriptionExpense = Expense(
                     amount: subscription.amount,
                     comment: "Subscription: \(subscription.name)",
-                    date: startOfPeriod,
+                    date: startOfMonth,
                     categoryId: subscription.categoryId
                 )
                 expenses.append(subscriptionExpense)
             }
         }
         saveData()
+    }
+
+    func fixExistingSubscriptionDates() {
+        let calendar = Calendar.current
+        var hasChanges = false
+
+        for i in 0..<expenses.count {
+            let expense = expenses[i]
+            // Check if this is a subscription expense
+            if expense.comment.hasPrefix("Subscription:") {
+                // Get the start of the month for this expense's date
+                let startOfMonth = calendar.dateInterval(of: .month, for: expense.date)?.start ?? expense.date
+
+                // If the expense is not on the 1st of the month, fix it
+                if expense.date != startOfMonth {
+                    expenses[i].date = startOfMonth
+                    hasChanges = true
+                }
+            }
+        }
+
+        if hasChanges {
+            saveData()
+        }
     }
     
     func updateIncome(_ income: Income) {
@@ -285,40 +283,7 @@ class DataManager: ObservableObject {
     
     func getBudgetPeriodForDate(_ date: Date) -> Date {
         let calendar = Calendar.current
-        
-        switch settings.resetType {
-        case .payDay:
-            let day = calendar.component(.day, from: date)
-            let month = calendar.component(.month, from: date)
-            let year = calendar.component(.year, from: date)
-            
-            if day >= settings.payDay {
-                // This expense belongs to the period starting this month
-                return calendar.date(from: DateComponents(year: year, month: month, day: settings.payDay)) ?? date
-            } else {
-                // This expense belongs to the period starting last month
-                let previousMonth = calendar.date(byAdding: .month, value: -1, to: date) ?? date
-                let prevMonth = calendar.component(.month, from: previousMonth)
-                let prevYear = calendar.component(.year, from: previousMonth)
-                return calendar.date(from: DateComponents(year: prevYear, month: prevMonth, day: settings.payDay)) ?? date
-            }
-            
-        case .monthlyDate:
-            let day = calendar.component(.day, from: date)
-            let month = calendar.component(.month, from: date)
-            let year = calendar.component(.year, from: date)
-            
-            if day >= settings.monthlyResetDate {
-                // This expense belongs to the period starting this month
-                return calendar.date(from: DateComponents(year: year, month: month, day: settings.monthlyResetDate)) ?? date
-            } else {
-                // This expense belongs to the period starting last month
-                let previousMonth = calendar.date(byAdding: .month, value: -1, to: date) ?? date
-                let prevMonth = calendar.component(.month, from: previousMonth)
-                let prevYear = calendar.component(.year, from: previousMonth)
-                return calendar.date(from: DateComponents(year: prevYear, month: prevMonth, day: settings.monthlyResetDate)) ?? date
-            }
-        }
+        return calendar.dateInterval(of: .month, for: date)?.start ?? date
     }
     
     func getExpensesGroupedByBudgetPeriod() -> [(key: String, value: [Expense])] {

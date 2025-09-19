@@ -88,16 +88,6 @@ struct Investment: Identifiable, Codable {
     }
 }
 
-enum ResetType: String, CaseIterable, Codable {
-    case payDay = "Pay Day"
-    case monthlyDate = "Monthly Date"
-    
-    var displayName: String {
-        return self.rawValue
-    }
-}
-
-
 struct Subscription: Identifiable, Codable {
     var id: UUID
     var name: String
@@ -177,17 +167,11 @@ enum Currency: String, CaseIterable, Codable {
 }
 
 struct Settings: Codable, Equatable {
-    var resetType: ResetType
-    var payDay: Int
-    var monthlyResetDate: Int
     var notificationsEnabled: Bool
     var dailyNotificationTime: Date
     var currency: Currency
 
     init() {
-        self.resetType = .payDay
-        self.payDay = 1
-        self.monthlyResetDate = 1
         self.notificationsEnabled = false
         self.dailyNotificationTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
         self.currency = .usd
