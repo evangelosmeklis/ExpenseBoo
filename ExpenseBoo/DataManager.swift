@@ -5,23 +5,20 @@ class DataManager: ObservableObject {
     @Published var expenses: [Expense] = []
     @Published var categories: [Category] = []
     @Published var incomes: [Income] = []
-    @Published var savingGoals: [SavingGoal] = []
+    @Published var investments: [Investment] = []
     @Published var subscriptions: [Subscription] = []
     @Published var settings: Settings = Settings()
     
     private let expensesKey = "expenses"
     private let categoriesKey = "categories"
     private let incomesKey = "incomes"
-    private let savingGoalsKey = "savingGoals"
+    private let investmentsKey = "investments"
     private let subscriptionsKey = "subscriptions"
     private let settingsKey = "settings"
-    private let lastMonthKey = "lastMonth"
     
     init() {
         loadData()
         createDefaultCategories()
-        checkForMonthChange()
-        allocateSurplusToGoals()
     }
     
     func loadData() {
@@ -39,12 +36,12 @@ class DataManager: ObservableObject {
            let decodedIncomes = try? JSONDecoder().decode([Income].self, from: incomesData) {
             incomes = decodedIncomes
         }
-        
-        if let savingGoalsData = UserDefaults.standard.data(forKey: savingGoalsKey),
-           let decodedSavingGoals = try? JSONDecoder().decode([SavingGoal].self, from: savingGoalsData) {
-            savingGoals = decodedSavingGoals
+
+        if let investmentsData = UserDefaults.standard.data(forKey: investmentsKey),
+           let decodedInvestments = try? JSONDecoder().decode([Investment].self, from: investmentsData) {
+            investments = decodedInvestments
         }
-        
+
         if let subscriptionsData = UserDefaults.standard.data(forKey: subscriptionsKey),
            let decodedSubscriptions = try? JSONDecoder().decode([Subscription].self, from: subscriptionsData) {
             subscriptions = decodedSubscriptions
@@ -68,11 +65,11 @@ class DataManager: ObservableObject {
         if let incomesData = try? JSONEncoder().encode(incomes) {
             UserDefaults.standard.set(incomesData, forKey: incomesKey)
         }
-        
-        if let savingGoalsData = try? JSONEncoder().encode(savingGoals) {
-            UserDefaults.standard.set(savingGoalsData, forKey: savingGoalsKey)
+
+        if let investmentsData = try? JSONEncoder().encode(investments) {
+            UserDefaults.standard.set(investmentsData, forKey: investmentsKey)
         }
-        
+
         if let subscriptionsData = try? JSONEncoder().encode(subscriptions) {
             UserDefaults.standard.set(subscriptionsData, forKey: subscriptionsKey)
         }
@@ -99,7 +96,6 @@ class DataManager: ObservableObject {
     func addExpense(_ expense: Expense) {
         expenses.append(expense)
         saveData()
-        allocateSurplusToGoals()
     }
     
     func addCategory(_ category: Category) {
@@ -115,30 +111,25 @@ class DataManager: ObservableObject {
     func addIncome(_ income: Income) {
         incomes.append(income)
         saveData()
-        allocateSurplusToGoals()
     }
-    
-    func addSavingGoal(_ goal: SavingGoal) {
-        savingGoals.append(goal)
+
+    func addInvestment(_ investment: Investment) {
+        investments.append(investment)
         saveData()
-        allocateSurplusToGoals()
     }
-    
-    func updateSavingGoal(_ goal: SavingGoal, shouldReallocate: Bool = true) {
-        if let index = savingGoals.firstIndex(where: { $0.id == goal.id }) {
-            savingGoals[index] = goal
+
+    func updateInvestment(_ investment: Investment) {
+        if let index = investments.firstIndex(where: { $0.id == investment.id }) {
+            investments[index] = investment
             saveData()
-            if shouldReallocate {
-                allocateSurplusToGoals()
-            }
         }
     }
-    
-    func deleteSavingGoal(_ goal: SavingGoal) {
-        savingGoals.removeAll { $0.id == goal.id }
+
+    func deleteInvestment(_ investment: Investment) {
+        investments.removeAll { $0.id == investment.id }
         saveData()
     }
-    
+
     func updateSettings(_ newSettings: Settings) {
         settings = newSettings
         saveData()
@@ -157,7 +148,20 @@ class DataManager: ObservableObject {
         let currentPeriodIncomes = getCurrentPeriodIncomes()
         return currentPeriodIncomes.reduce(0) { $0 + $1.amount }
     }
-    
+
+    func getCurrentMonthInvestments() -> [Investment] {
+        let now = Date()
+        let startOfPeriod = getStartOfCurrentPeriod()
+
+        return investments.filter { investment in
+            investment.date >= startOfPeriod && investment.date <= now
+        }
+    }
+
+    func getCurrentMonthInvestmentTotal() -> Double {
+        return getCurrentMonthInvestments().reduce(0) { $0 + $1.amount }
+    }
+
     private func getCurrentPeriodIncomes() -> [Income] {
         let startOfPeriod = getStartOfCurrentPeriod()
         let now = Date()
@@ -253,35 +257,30 @@ class DataManager: ObservableObject {
             }
         }
         saveData()
-        allocateSurplusToGoals()
     }
     
     func updateIncome(_ income: Income) {
         if let index = incomes.firstIndex(where: { $0.id == income.id }) {
             incomes[index] = income
             saveData()
-            allocateSurplusToGoals()
         }
     }
     
     func deleteIncome(_ income: Income) {
         incomes.removeAll { $0.id == income.id }
         saveData()
-        allocateSurplusToGoals()
     }
     
     func updateExpense(_ expense: Expense) {
         if let index = expenses.firstIndex(where: { $0.id == expense.id }) {
             expenses[index] = expense
             saveData()
-            allocateSurplusToGoals()
         }
     }
     
     func deleteExpense(_ expense: Expense) {
         expenses.removeAll { $0.id == expense.id }
         saveData()
-        allocateSurplusToGoals()
     }
     
     func getBudgetPeriodForDate(_ date: Date) -> Date {
@@ -325,93 +324,60 @@ class DataManager: ObservableObject {
     func getExpensesGroupedByBudgetPeriod() -> [(key: String, value: [Expense])] {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
-        
+
         let grouped = Dictionary(grouping: expenses) { expense in
             let periodStart = getBudgetPeriodForDate(expense.date)
             return formatter.string(from: periodStart)
         }
-        
+
         return grouped.sorted { first, second in
             let firstDate = formatter.date(from: first.key) ?? Date.distantPast
             let secondDate = formatter.date(from: second.key) ?? Date.distantPast
             return firstDate > secondDate
         }
     }
-    
-    func allocateSurplusToGoals() {
-        guard let genericGoal = savingGoals.first(where: { $0.isGeneric }) else { return }
-        
-        let currentBalance = getCurrentBalance()
-        let monthlySavingTarget = genericGoal.targetAmount
-        let currentMonthKey = getCurrentMonthKey()
-        
-        let activeSpecificGoals = savingGoals.filter { !$0.isGeneric && $0.targetDate >= Date() && $0.progress < 1.0 }
-        guard !activeSpecificGoals.isEmpty else { 
-            // Clear any current month allocations if no active goals
-            return
-        }
-        
-        // Calculate surplus above monthly saving target
-        if currentBalance > monthlySavingTarget {
-            let surplusAmount = currentBalance - monthlySavingTarget
-            let allocationPerGoal = surplusAmount / Double(activeSpecificGoals.count)
-            
-            // Update current month contributions (not permanent until month ends)
-            for i in 0..<activeSpecificGoals.count {
-                var goal = activeSpecificGoals[i]
-                goal.monthlyContributions[currentMonthKey] = allocationPerGoal
-                updateSavingGoal(goal, shouldReallocate: false)
-            }
-        } else {
-            // If deficit, reduce current month contributions proportionally
-            let deficit = monthlySavingTarget - currentBalance
-            let reductionPerGoal = deficit / Double(activeSpecificGoals.count)
-            
-            for i in 0..<activeSpecificGoals.count {
-                var goal = activeSpecificGoals[i]
-                let currentContribution = goal.monthlyContributions[currentMonthKey] ?? 0
-                goal.monthlyContributions[currentMonthKey] = max(0, currentContribution - reductionPerGoal)
-                updateSavingGoal(goal, shouldReallocate: false)
-            }
-        }
+
+    // MARK: - Stats Functions
+    func getAvailableYears() -> [Int] {
+        let allDates = expenses.map { $0.date } + incomes.map { $0.date } + investments.map { $0.date }
+        let years = Set(allDates.map { Calendar.current.component(.year, from: $0) })
+        return Array(years).sorted(by: >)
     }
-    
-    public func getCurrentMonthKey() -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM"
-        return formatter.string(from: Date())
-    }
-    
-    func checkForMonthChange() {
-        let currentMonthKey = getCurrentMonthKey()
-        let lastStoredMonth = UserDefaults.standard.string(forKey: lastMonthKey)
-        
-        if let lastMonth = lastStoredMonth, lastMonth != currentMonthKey {
-            // Month has changed, solidify contributions from previous month
-            solidifyMonthContributions(for: lastMonth)
+
+    func getMonthlyStats(for year: Int) -> [MonthlyStats] {
+        var monthlyStats: [MonthlyStats] = []
+
+        for month in 1...12 {
+            let stats = getStatsForMonth(month: month, year: year)
+            monthlyStats.append(stats)
         }
-        
-        // Update stored month
-        UserDefaults.standard.set(currentMonthKey, forKey: lastMonthKey)
+
+        return monthlyStats
     }
-    
-    func solidifyMonthContributions(for monthKey: String) {
-        for i in 0..<savingGoals.count {
-            var goal = savingGoals[i]
-            if !goal.isGeneric {
-                if let contribution = goal.monthlyContributions[monthKey], contribution > 0 {
-                    // Move contribution to permanent currentAmount
-                    goal.currentAmount += contribution
-                    goal.monthlyContributions.removeValue(forKey: monthKey)
-                    savingGoals[i] = goal
-                }
-            }
-        }
-        saveData()
-    }
-    
-    func solidifyCurrentMonthContributions() {
-        let currentMonthKey = getCurrentMonthKey()
-        solidifyMonthContributions(for: currentMonthKey)
+
+    private func getStatsForMonth(month: Int, year: Int) -> MonthlyStats {
+        let calendar = Calendar.current
+
+        let startOfMonth = calendar.date(from: DateComponents(year: year, month: month, day: 1)) ?? Date()
+        let endOfMonth = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startOfMonth) ?? Date()
+
+        let monthExpenses = expenses.filter { $0.date >= startOfMonth && $0.date <= endOfMonth }
+        let monthIncomes = incomes.filter { $0.date >= startOfMonth && $0.date <= endOfMonth }
+        let monthInvestments = investments.filter { $0.date >= startOfMonth && $0.date <= endOfMonth }
+
+        let totalExpenses = monthExpenses.reduce(0) { $0 + $1.amount }
+        let totalIncome = monthIncomes.reduce(0) { $0 + $1.amount }
+        let totalInvestments = monthInvestments.reduce(0) { $0 + $1.amount }
+
+        let profitLoss = totalIncome - totalExpenses
+
+        return MonthlyStats(
+            month: month,
+            year: year,
+            income: totalIncome,
+            expenses: totalExpenses,
+            investments: totalInvestments,
+            profitLoss: profitLoss
+        )
     }
 }

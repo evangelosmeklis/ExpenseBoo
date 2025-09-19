@@ -63,12 +63,28 @@ struct Income: Identifiable, Codable {
     var amount: Double
     var date: Date
     var isMonthly: Bool
-    
+
     init(amount: Double, date: Date = Date(), isMonthly: Bool = true) {
         self.id = UUID()
         self.amount = amount
         self.date = date
         self.isMonthly = isMonthly
+    }
+}
+
+struct Investment: Identifiable, Codable {
+    var id: UUID
+    var amount: Double
+    var comment: String
+    var date: Date
+    var categoryId: UUID?
+
+    init(amount: Double, comment: String, date: Date = Date(), categoryId: UUID? = nil) {
+        self.id = UUID()
+        self.amount = amount
+        self.comment = comment
+        self.date = date
+        self.categoryId = categoryId
     }
 }
 
@@ -81,55 +97,6 @@ enum ResetType: String, CaseIterable, Codable {
     }
 }
 
-struct SavingGoal: Identifiable, Codable {
-    var id: UUID
-    var name: String
-    var targetAmount: Double
-    var currentAmount: Double
-    var targetDate: Date
-    var isGeneric: Bool
-    var monthlyContributions: [String: Double]
-    
-    init(name: String, targetAmount: Double, currentAmount: Double = 0, targetDate: Date, isGeneric: Bool = false) {
-        self.id = UUID()
-        self.name = name
-        self.targetAmount = targetAmount
-        self.currentAmount = currentAmount
-        self.targetDate = targetDate
-        self.isGeneric = isGeneric
-        self.monthlyContributions = [:]
-    }
-    
-    var totalContributions: Double {
-        return monthlyContributions.values.reduce(0, +)
-    }
-    
-    var totalWithContributions: Double {
-        return currentAmount + totalContributions
-    }
-    
-    var progress: Double {
-        guard targetAmount > 0 else { return 0 }
-        return min(totalWithContributions / targetAmount, 1.0)
-    }
-    
-    var remainingAmount: Double {
-        return max(targetAmount - totalWithContributions, 0)
-    }
-    
-    var daysRemaining: Int {
-        let calendar = Calendar.current
-        let startOfToday = calendar.startOfDay(for: Date())
-        let startOfTargetDate = calendar.startOfDay(for: targetDate)
-        let days = calendar.dateComponents([.day], from: startOfToday, to: startOfTargetDate).day ?? 0
-        return max(days, 0)
-    }
-    
-    var dailySavingNeeded: Double {
-        guard daysRemaining > 0 else { return remainingAmount }
-        return remainingAmount / Double(daysRemaining)
-    }
-}
 
 struct Subscription: Identifiable, Codable {
     var id: UUID
@@ -216,7 +183,7 @@ struct Settings: Codable, Equatable {
     var notificationsEnabled: Bool
     var dailyNotificationTime: Date
     var currency: Currency
-    
+
     init() {
         self.resetType = .payDay
         self.payDay = 1
@@ -224,5 +191,22 @@ struct Settings: Codable, Equatable {
         self.notificationsEnabled = false
         self.dailyNotificationTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
         self.currency = .usd
+    }
+}
+
+struct MonthlyStats: Identifiable {
+    let id = UUID()
+    let month: Int
+    let year: Int
+    let income: Double
+    let expenses: Double
+    let investments: Double
+    let profitLoss: Double
+
+    var monthName: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM"
+        let date = Calendar.current.date(from: DateComponents(year: year, month: month)) ?? Date()
+        return formatter.string(from: date)
     }
 }

@@ -19,21 +19,21 @@ struct ContentView: View {
                     Text("Dashboard")
                 }
                 .tag(0)
-            
+
             ExpensesView()
                 .tabItem {
                     Image(systemName: "list.bullet")
                     Text("Expenses")
                 }
                 .tag(1)
-            
-            SavingGoalsView()
+
+            StatsView()
                 .tabItem {
-                    Image(systemName: "target")
-                    Text("Goals")
+                    Image(systemName: "chart.bar.fill")
+                    Text("Stats")
                 }
                 .tag(2)
-            
+
             SettingsView()
                 .tabItem {
                     Image(systemName: "gear")

@@ -5,6 +5,7 @@ struct SettingsView: View {
     @State private var tempSettings: Settings
     @State private var showingCategoryManagement = false
     @State private var showingIncomeManagement = false
+    @State private var showingInvestmentManagement = false
     @State private var showingSubscriptionManagement = false
     
     init() {
@@ -92,7 +93,7 @@ struct SettingsView: View {
                     }
                 }
                 
-                Section(header: Text("Income & Expenses")) {
+                Section(header: Text("Financial Data")) {
                     Button("Manage Income") {
                         showingIncomeManagement = true
                     }
@@ -100,7 +101,15 @@ struct SettingsView: View {
                     Text("\(dataManager.incomes.count) income entries")
                         .foregroundColor(.secondary)
                         .font(.caption)
-                    
+
+                    Button("Manage Investments") {
+                        showingInvestmentManagement = true
+                    }
+
+                    Text("\(dataManager.investments.count) investment entries")
+                        .foregroundColor(.secondary)
+                        .font(.caption)
+
                     Button("Manage Categories") {
                         showingCategoryManagement = true
                     }
@@ -155,12 +164,6 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                     
-                    HStack {
-                        Text("Saving Goals")
-                        Spacer()
-                        Text("\(dataManager.savingGoals.count)")
-                            .foregroundColor(.secondary)
-                    }
                 }
             }
             .navigationTitle("Settings")
@@ -176,6 +179,9 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingIncomeManagement) {
                 IncomeManagementView()
+            }
+            .sheet(isPresented: $showingInvestmentManagement) {
+                InvestmentManagementView()
             }
             .sheet(isPresented: $showingSubscriptionManagement) {
                 SubscriptionManagementView()

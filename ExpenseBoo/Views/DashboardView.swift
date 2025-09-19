@@ -9,12 +9,10 @@ struct DashboardView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     BalanceCard()
-                    
+
                     QuickActionsSection()
-                    
+
                     RecentExpensesSection()
-                    
-                    SavingGoalsSection()
                 }
                 .padding()
             }
@@ -88,28 +86,40 @@ struct QuickActionsSection: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var showingAddExpense = false
     @State private var showingAddIncome = false
-    
+    @State private var showingAddInvestment = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Quick Actions")
                 .font(.headline)
-            
-            HStack(spacing: 12) {
-                Button(action: { showingAddExpense = true }) {
-                    Label("Add Expense", systemImage: "minus.circle.fill")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.red.opacity(0.1))
-                        .foregroundColor(.red)
-                        .cornerRadius(10)
+
+            VStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    Button(action: { showingAddExpense = true }) {
+                        Label("Add Expense", systemImage: "minus.circle.fill")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .foregroundColor(.red)
+                            .cornerRadius(10)
+                    }
+
+                    Button(action: { showingAddIncome = true }) {
+                        Label("Add Income", systemImage: "plus.circle.fill")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green.opacity(0.1))
+                            .foregroundColor(.green)
+                            .cornerRadius(10)
+                    }
                 }
-                
-                Button(action: { showingAddIncome = true }) {
-                    Label("Add Income", systemImage: "plus.circle.fill")
+
+                Button(action: { showingAddInvestment = true }) {
+                    Label("Add Investment", systemImage: "chart.line.uptrend.xyaxis")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.green.opacity(0.1))
-                        .foregroundColor(.green)
+                        .background(Color.purple.opacity(0.1))
+                        .foregroundColor(.purple)
                         .cornerRadius(10)
                 }
             }
@@ -119,6 +129,9 @@ struct QuickActionsSection: View {
         }
         .sheet(isPresented: $showingAddIncome) {
             AddIncomeView()
+        }
+        .sheet(isPresented: $showingAddInvestment) {
+            AddInvestmentView()
         }
     }
 }
@@ -156,48 +169,6 @@ struct RecentExpensesSection: View {
     }
 }
 
-struct SavingGoalsSection: View {
-    @EnvironmentObject var dataManager: DataManager
-    
-    var activeGoals: [SavingGoal] {
-        Array(dataManager.savingGoals.filter { $0.targetDate >= Date() && !$0.isGeneric }.prefix(3))
-    }
-    
-    var genericGoal: SavingGoal? {
-        dataManager.savingGoals.first { $0.isGeneric }
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Saving Goals")
-                    .font(.headline)
-                Spacer()
-                NavigationLink("See All", destination: SavingGoalsView())
-                    .font(.caption)
-                    .foregroundColor(.blue)
-            }
-            
-            VStack(spacing: 8) {
-                // Show generic goal first if it exists
-                if let genericGoal = genericGoal {
-                    GenericGoalRowView(goal: genericGoal)
-                }
-                
-                // Show specific goals
-                if !activeGoals.isEmpty {
-                    ForEach(activeGoals) { goal in
-                        SavingGoalRowView(goal: goal)
-                    }
-                } else if genericGoal == nil {
-                    Text("No active saving goals")
-                        .foregroundColor(.secondary)
-                        .padding()
-                }
-            }
-        }
-    }
-}
 
 #Preview {
     DashboardView()
