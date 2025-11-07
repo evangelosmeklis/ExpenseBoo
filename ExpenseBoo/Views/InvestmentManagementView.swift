@@ -59,39 +59,40 @@ struct InvestmentRowView: View {
     @State private var showingEditInvestment = false
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(dataManager.currencySymbol)\(investment.amount, specifier: "%.2f")")
-                    .font(.headline)
-                    .foregroundColor(.purple)
+                    .font(AppTheme.Fonts.number(16))
+                    .foregroundColor(AppTheme.Colors.investment)
 
                 Text(investment.comment)
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
+                    .font(AppTheme.Fonts.body(14))
 
                 HStack {
                     Text(investment.date, style: .date)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(AppTheme.Fonts.caption(10))
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
 
                     if let categoryId = investment.categoryId,
                        let category = dataManager.getCategoryById(categoryId) {
                         Text("• \(category.name)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.caption(10))
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                     }
                 }
             }
 
             Spacer()
 
-            Button("Edit") {
+            Button("EDIT") {
                 showingEditInvestment = true
             }
-            .font(.caption)
-            .foregroundColor(.purple)
+            .font(AppTheme.Fonts.caption(10))
+            .foregroundColor(AppTheme.Colors.investment)
+            .tracking(1)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
         .sheet(isPresented: $showingEditInvestment) {
             EditInvestmentView(investment: investment)
         }

@@ -84,6 +84,10 @@ struct ExpensesView: View {
     var profitLoss: Double {
         return incomeTotal - expenseTotal
     }
+
+    var profitLossWithoutInvestments: Double {
+        return incomeTotal - expenseTotal - investmentTotal
+    }
     
     var groupedExpensesByBudgetPeriod: [(key: String, value: [Expense])] {
         return dataManager.getExpensesGroupedByBudgetPeriod()
@@ -120,6 +124,7 @@ struct ExpensesView: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding(.horizontal)
+                    .accentColor(AppTheme.Colors.electricCyan)
                     
                     if selectedPeriod == 1 {
                         HStack {
@@ -134,54 +139,62 @@ struct ExpensesView: View {
                     }
                     
                     // P/L Summary
-                    VStack(spacing: 8) {
+                    VStack(spacing: 10) {
                         HStack {
-                            Text("Income:")
-                                .font(.subheadline)
+                            Text("INCOME:")
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(incomeTotal, specifier: "%.2f")")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.green)
+                                .font(AppTheme.Fonts.number(14))
+                                .foregroundColor(AppTheme.Colors.income)
                         }
 
                         HStack {
-                            Text("Expenses:")
-                                .font(.subheadline)
+                            Text("EXPENSES:")
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(expenseTotal, specifier: "%.2f")")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.red)
+                                .font(AppTheme.Fonts.number(14))
+                                .foregroundColor(AppTheme.Colors.expense)
                         }
 
                         HStack {
-                            Text("Investments:")
-                                .font(.subheadline)
+                            Text("INVESTMENTS:")
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(investmentTotal, specifier: "%.2f")")
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.purple)
+                                .font(AppTheme.Fonts.number(14))
+                                .foregroundColor(AppTheme.Colors.investment)
                         }
 
                         Divider()
+                            .background(AppTheme.Colors.electricCyan.opacity(0.3))
 
                         HStack {
                             Text("P/L:")
-                                .font(.headline)
-                                .fontWeight(.bold)
+                                .font(AppTheme.Fonts.headline(16))
+                                .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(profitLoss, specifier: "%.2f")")
-                                .font(.headline)
-                                .fontWeight(.bold)
-                                .foregroundColor(profitLoss >= 0 ? .green : .red)
+                                .font(AppTheme.Fonts.headline(16))
+                                .foregroundColor(profitLoss >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
+                        }
+
+                        HStack {
+                            Text("P/L w/o invest:")
+                                .font(AppTheme.Fonts.body(12))
+                                .tracking(0.5)
+                            Spacer()
+                            Text("\(dataManager.currencySymbol)\(profitLossWithoutInvestments, specifier: "%.2f")")
+                                .font(AppTheme.Fonts.number(13))
+                                .foregroundColor(profitLossWithoutInvestments >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 12)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                    .padding(16)
+                    .techCard(glowColor: AppTheme.Colors.vibrantPurple.opacity(0.5))
                     .padding(.horizontal)
                 }
                 
@@ -189,17 +202,20 @@ struct ExpensesView: View {
                     VStack(spacing: 20) {
                         Image(systemName: "list.bullet")
                             .font(.system(size: 50))
-                            .foregroundColor(.gray)
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.5))
 
-                        Text("No transactions yet")
-                            .font(.title2)
-                            .foregroundColor(.secondary)
+                        Text("// NO_TRANSACTIONS_YET")
+                            .font(AppTheme.Fonts.headline(16))
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.8))
+                            .tracking(1)
 
                         Text("Start adding income, expenses, and investments")
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.caption())
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(AppTheme.Colors.primaryBackground)
                 } else {
                     List {
                         // Income Section
@@ -255,11 +271,20 @@ struct ExpensesView: View {
                     }
                 }
             }
+            .background(AppTheme.Colors.primaryBackground.ignoresSafeArea())
             .navigationTitle("P/L")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(">> P/L")
+                        .font(AppTheme.Fonts.headline(18))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                        .tracking(2)
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddExpense = true }) {
-                        Image(systemName: "plus")
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(AppTheme.Colors.electricCyan)
                     }
                 }
             }
@@ -303,42 +328,48 @@ struct ExpenseRowView: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             if let category = category {
                 Circle()
                     .fill(category.color)
-                    .frame(width: 12, height: 12)
+                    .frame(width: 10, height: 10)
+                    .overlay(
+                        Circle()
+                            .stroke(category.color.opacity(0.5), lineWidth: 2)
+                            .blur(radius: 2)
+                    )
             } else {
                 Circle()
                     .fill(Color.gray)
-                    .frame(width: 12, height: 12)
+                    .frame(width: 10, height: 10)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(expense.comment)
-                    .font(.body)
+                    .font(AppTheme.Fonts.body(14))
 
                 HStack {
-                    Text(category?.name ?? "Uncategorized")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    Text(category?.name ?? "UNCATEGORIZED")
+                        .font(AppTheme.Fonts.caption(10))
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                        .tracking(0.5)
 
                     Spacer()
 
                     Text(expense.date, style: .time)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(AppTheme.Fonts.caption(10))
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.5))
                 }
             }
 
             Spacer()
 
             Text("\(dataManager.currencySymbol)\(expense.amount, specifier: "%.2f")")
-                .font(.body)
-                .fontWeight(.semibold)
-                .foregroundColor(.red)
+                .font(AppTheme.Fonts.number(14))
+                .foregroundColor(AppTheme.Colors.expense)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
         .contentShape(Rectangle())
         .onTapGesture {
             showingEditExpense = true

@@ -12,11 +12,16 @@ struct AddExpenseView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Expense Details")) {
+                Section(header: Text(">> EXPENSE_DETAILS")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     HStack {
                         Text(dataManager.currencySymbol)
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                         TextField("0.00", text: $amount)
+                            .font(AppTheme.Fonts.body())
                             .keyboardType(.decimalPad)
                             .onChange(of: amount) { oldValue, newValue in
                                 // Clean and format the input to handle decimals properly
@@ -26,16 +31,28 @@ struct AddExpenseView: View {
                                 }
                             }
                     }
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                     
                     TextField("What did you buy?", text: $comment)
+                        .font(AppTheme.Fonts.body())
+                        .listRowBackground(AppTheme.Colors.cardBackground)
                     
                     DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
+                        .font(AppTheme.Fonts.body())
+                        .accentColor(AppTheme.Colors.electricCyan)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
                 }
                 
-                Section(header: Text("Category")) {
+                Section(header: Text(">> CATEGORY")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     if dataManager.categories.isEmpty {
-                        Text("No categories available")
-                            .foregroundColor(.secondary)
+                        Text("NO_CATEGORIES_AVAILABLE")
+                            .font(AppTheme.Fonts.caption())
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.5))
+                            .tracking(1)
+                            .listRowBackground(AppTheme.Colors.cardBackground)
                     } else {
                         ForEach(dataManager.categories) { category in
                             HStack {
@@ -44,15 +61,17 @@ struct AddExpenseView: View {
                                     .frame(width: 12, height: 12)
                                 
                                 Text(category.name)
+                                    .font(AppTheme.Fonts.body())
                                 
                                 Spacer()
                                 
                                 if selectedCategory?.id == category.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(AppTheme.Colors.electricCyan)
                                 }
                             }
                             .contentShape(Rectangle())
+                            .listRowBackground(AppTheme.Colors.cardBackground)
                             .onTapGesture {
                                 selectedCategory = category
                             }
@@ -60,19 +79,33 @@ struct AddExpenseView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.Colors.primaryBackground)
             .navigationTitle("Add Expense")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(">> ADD_EXPENSE")
+                        .font(AppTheme.Fonts.headline(16))
+                        .foregroundColor(AppTheme.Colors.expense)
+                        .tracking(2)
+                }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button("CANCEL") {
                         dismiss()
                     }
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(1)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button("SAVE") {
                         saveExpense()
                     }
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(amount.isEmpty || comment.isEmpty ? AppTheme.Colors.electricCyan.opacity(0.3) : AppTheme.Colors.neonGreen)
+                    .tracking(1)
                     .disabled(amount.isEmpty || comment.isEmpty)
                 }
             }

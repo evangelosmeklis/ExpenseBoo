@@ -43,20 +43,26 @@ struct StatsView: View {
                 .pickerStyle(SegmentedPickerStyle())
                 .padding(.horizontal)
                 .padding(.top)
+                .accentColor(AppTheme.Colors.electricCyan)
 
                 // Year Picker
                 HStack {
-                    Text("Year:")
-                        .font(.headline)
+                    Text(">> YEAR:")
+                        .font(AppTheme.Fonts.body(14))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                        .tracking(2)
 
                     Spacer()
 
                     Picker("Year", selection: $selectedYear) {
                         ForEach(availableYears, id: \.self) { year in
-                            Text(String(year)).tag(year)
+                            Text(String(year))
+                                .font(AppTheme.Fonts.body())
+                                .tag(year)
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                    .accentColor(AppTheme.Colors.electricCyan)
                 }
                 .padding(.horizontal)
 
@@ -64,10 +70,12 @@ struct StatsView: View {
                     // Monthly View
                     VStack(spacing: 16) {
                         Toggle(isOn: $showFullYear) {
-                            Text(showFullYear ? "Showing full year" : "Showing up to current month")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                            Text(showFullYear ? "SHOWING_FULL_YEAR" : "SHOWING_UP_TO_CURRENT")
+                                .font(AppTheme.Fonts.caption(11))
+                                .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.8))
+                                .tracking(1)
                         }
+                        .tint(AppTheme.Colors.electricCyan)
                         .padding(.horizontal)
                     }
 
@@ -77,17 +85,28 @@ struct StatsView: View {
                             MonthlyStatsRowView(stats: monthStats, year: selectedYear)
                         }
                     }
+                    .scrollContentBackground(.hidden)
+                    .background(AppTheme.Colors.primaryBackground)
                 } else {
                     // Yearly Summary View
                     YearlyStatsView(year: selectedYear)
                 }
             }
+            .background(AppTheme.Colors.primaryBackground.ignoresSafeArea())
             .navigationTitle("Stats")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(">> STATS")
+                        .font(AppTheme.Fonts.headline(18))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                        .tracking(2)
+                }
                 if selectedView == 0 {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(action: { showingAddManualPL = true }) {
-                            Image(systemName: "plus")
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundColor(AppTheme.Colors.electricCyan)
                         }
                     }
                 }
@@ -115,73 +134,83 @@ struct MonthlyStatsRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(stats.monthName)
-                    .font(.headline)
+                Text(stats.monthName.uppercased())
+                    .font(AppTheme.Fonts.headline(16))
+                    .tracking(1)
 
                 if isManualEntry {
-                    Text("(Manual)")
-                        .font(.caption)
-                        .foregroundColor(.blue)
+                    Text("[MANUAL]")
+                        .font(AppTheme.Fonts.caption(9))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                        .tracking(1)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color.blue.opacity(0.1))
+                        .background(AppTheme.Colors.electricCyan.opacity(0.15))
                         .cornerRadius(4)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .stroke(AppTheme.Colors.electricCyan, lineWidth: 1)
+                        )
                 }
 
                 Spacer()
 
-                VStack(alignment: .trailing) {
+                VStack(alignment: .trailing, spacing: 2) {
                     HStack(spacing: 4) {
                         Text("P/L")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.caption(10))
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                            .tracking(1)
                         if hasNoData || isManualEntry {
                             Image(systemName: "pencil.circle")
-                                .font(.caption)
-                                .foregroundColor(.blue)
+                                .font(AppTheme.Fonts.caption(10))
+                                .foregroundColor(AppTheme.Colors.electricCyan)
                         }
                     }
                     Text("\(dataManager.currencySymbol)\(stats.profitLoss, specifier: "%.2f")")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(stats.profitLoss >= 0 ? .green : .red)
+                        .font(AppTheme.Fonts.number(16))
+                        .foregroundColor(stats.profitLoss >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
                 }
             }
 
             if !isManualEntry {
                 Divider()
+                    .background(AppTheme.Colors.electricCyan.opacity(0.3))
 
                 HStack {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Label {
                             Text("\(dataManager.currencySymbol)\(stats.income, specifier: "%.2f")")
-                                .foregroundColor(.green)
+                                .font(AppTheme.Fonts.number(13))
+                                .foregroundColor(AppTheme.Colors.income)
                         } icon: {
                             Image(systemName: "plus.circle.fill")
-                                .foregroundColor(.green)
+                                .foregroundColor(AppTheme.Colors.income)
+                                .font(.system(size: 12))
                         }
-                        .font(.subheadline)
 
                         Label {
                             Text("\(dataManager.currencySymbol)\(stats.expenses, specifier: "%.2f")")
-                                .foregroundColor(.red)
+                                .font(AppTheme.Fonts.number(13))
+                                .foregroundColor(AppTheme.Colors.expense)
                         } icon: {
                             Image(systemName: "minus.circle.fill")
-                                .foregroundColor(.red)
+                                .foregroundColor(AppTheme.Colors.expense)
+                                .font(.system(size: 12))
                         }
-                        .font(.subheadline)
 
                         if stats.investments > 0 {
                             Label {
                                 Text("\(dataManager.currencySymbol)\(stats.investments, specifier: "%.2f")")
-                                    .foregroundColor(.purple)
+                                    .font(AppTheme.Fonts.number(13))
+                                    .foregroundColor(AppTheme.Colors.investment)
                             } icon: {
                                 Image(systemName: "chart.line.uptrend.xyaxis")
-                                    .foregroundColor(.purple)
+                                    .foregroundColor(AppTheme.Colors.investment)
+                                    .font(.system(size: 12))
                             }
-                            .font(.subheadline)
                         }
                     }
 
@@ -243,7 +272,7 @@ struct MonthlyStatsRowView: View {
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(12)
         .contentShape(Rectangle())
         .onTapGesture {
             showingEditManualPL = true
@@ -256,6 +285,8 @@ struct MonthlyStatsRowView: View {
         .sheet(isPresented: $showingEditManualPL) {
             AddManualPLView(selectedYear: year, selectedMonth: stats.month)
         }
+        .listRowBackground(AppTheme.Colors.cardBackground)
+        .listRowSeparatorTint(AppTheme.Colors.electricCyan.opacity(0.2))
     }
 
     private var hasNoData: Bool {
@@ -275,88 +306,126 @@ struct YearlyStatsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 // Summary Cards
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 16) {
+                VStack(spacing: 16) {
+                    Text(">> YEARLY_SUMMARY")
+                        .font(AppTheme.Fonts.caption(11))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                        .tracking(2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                    
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 16) {
                     StatCard(
                         title: "Total Income",
                         value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalIncome),
-                        color: .green,
+                        color: AppTheme.Colors.income,
                         icon: "plus.circle.fill"
                     )
 
                     StatCard(
                         title: "Total Expenses",
                         value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalExpenses),
-                        color: .red,
+                        color: AppTheme.Colors.expense,
                         icon: "minus.circle.fill"
                     )
 
                     StatCard(
                         title: "Total Investments",
                         value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalInvestments),
-                        color: .purple,
+                        color: AppTheme.Colors.investment,
                         icon: "chart.line.uptrend.xyaxis"
                     )
 
-                    StatCard(
-                        title: "Net P/L",
-                        value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalProfitLoss),
-                        color: yearlyStats.totalProfitLoss >= 0 ? .green : .red,
-                        icon: yearlyStats.totalProfitLoss >= 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill"
-                    )
+                        StatCard(
+                            title: "Net P/L",
+                            value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalProfitLoss),
+                            color: yearlyStats.totalProfitLoss >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss,
+                            icon: yearlyStats.totalProfitLoss >= 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill"
+                        )
+                    }
+
+                    // Centered card for P/L without investments
+                    HStack {
+                        Spacer()
+                        StatCard(
+                            title: "P/L without investments",
+                            value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalProfitLossWithoutInvestments),
+                            color: yearlyStats.totalProfitLossWithoutInvestments >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss,
+                            icon: yearlyStats.totalProfitLossWithoutInvestments >= 0 ? "dollarsign.circle.fill" : "dollarsign.circle"
+                        )
+                        .frame(maxWidth: .infinity)
+                        Spacer()
+                    }
                 }
+                .padding(.horizontal)
 
                 // Performance Metrics
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Performance Metrics")
-                        .font(.headline)
+                    Text(">> PERFORMANCE_METRICS")
+                        .font(AppTheme.Fonts.caption(11))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                        .tracking(2)
                         .padding(.horizontal)
 
                     VStack(spacing: 12) {
                         HStack {
-                            Text("Average Monthly P/L:")
-                                .font(.subheadline)
+                            Text("Avg Monthly P/L:")
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(0.5)
                             Spacer()
                             Text(String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.averageMonthlyPL))
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(yearlyStats.averageMonthlyPL >= 0 ? .green : .red)
+                                .font(AppTheme.Fonts.number(14))
+                                .foregroundColor(yearlyStats.averageMonthlyPL >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
+                        }
+
+                        HStack {
+                            Text("Avg P/L w/o invest:")
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(0.5)
+                            Spacer()
+                            Text(String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.averageMonthlyPLWithoutInvestments))
+                                .font(AppTheme.Fonts.number(14))
+                                .foregroundColor(yearlyStats.averageMonthlyPLWithoutInvestments >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
                         }
 
                         Divider()
+                            .background(AppTheme.Colors.electricCyan.opacity(0.3))
 
                         HStack {
                             Text("Best Month:")
-                                .font(.subheadline)
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(0.5)
                             Spacer()
-                            VStack(alignment: .trailing) {
-                                Text(yearlyStats.bestMonth)
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(yearlyStats.bestMonth.uppercased())
+                                    .font(AppTheme.Fonts.body(12))
+                                    .tracking(1)
                                 Text(String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.bestMonthPL))
-                                    .font(.caption)
-                                    .foregroundColor(.green)
+                                    .font(AppTheme.Fonts.number(12))
+                                    .foregroundColor(AppTheme.Colors.profit)
                             }
                         }
 
                         Divider()
+                            .background(AppTheme.Colors.electricCyan.opacity(0.3))
 
                         HStack {
                             Text("Worst Month:")
-                                .font(.subheadline)
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(0.5)
                             Spacer()
-                            VStack(alignment: .trailing) {
-                                Text(yearlyStats.worstMonth)
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(yearlyStats.worstMonth.uppercased())
+                                    .font(AppTheme.Fonts.body(12))
+                                    .tracking(1)
                                 Text(String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.worstMonthPL))
-                                    .font(.caption)
-                                    .foregroundColor(.red)
+                                    .font(AppTheme.Fonts.number(12))
+                                    .foregroundColor(AppTheme.Colors.loss)
                             }
                         }
                     }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
+                    .padding(16)
+                    .techCard(glowColor: AppTheme.Colors.vibrantPurple.opacity(0.5))
                     .padding(.horizontal)
                 }
 
@@ -364,6 +433,7 @@ struct YearlyStatsView: View {
             }
             .padding(.top)
         }
+        .background(AppTheme.Colors.primaryBackground.ignoresSafeArea())
     }
 }
 
@@ -374,26 +444,25 @@ struct StatCard: View {
     let icon: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: icon)
                     .foregroundColor(color)
-                    .font(.title2)
+                    .font(.system(size: 24))
                 Spacer()
             }
 
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            Text(title.uppercased())
+                .font(AppTheme.Fonts.caption(9))
+                .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                .tracking(1)
 
             Text(value)
-                .font(.headline)
-                .fontWeight(.bold)
+                .font(AppTheme.Fonts.number(16))
                 .foregroundColor(color)
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
+        .padding(16)
+        .techCard(glowColor: color.opacity(0.5))
     }
 }
 

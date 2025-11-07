@@ -17,6 +17,7 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "house.fill")
                     Text("Dashboard")
+                        .font(AppTheme.Fonts.caption())
                 }
                 .tag(0)
 
@@ -24,6 +25,7 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "list.bullet")
                     Text("P/L")
+                        .font(AppTheme.Fonts.caption())
                 }
                 .tag(1)
 
@@ -31,6 +33,7 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "chart.bar.fill")
                     Text("Stats")
+                        .font(AppTheme.Fonts.caption())
                 }
                 .tag(2)
 
@@ -38,9 +41,11 @@ struct ContentView: View {
                 .tabItem {
                     Image(systemName: "gear")
                     Text("Settings")
+                        .font(AppTheme.Fonts.caption())
                 }
                 .tag(3)
         }
+        .accentColor(AppTheme.Colors.electricCyan)
     }
 }
 

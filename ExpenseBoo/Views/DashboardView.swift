@@ -16,7 +16,16 @@ struct DashboardView: View {
                 }
                 .padding()
             }
+            .background(AppTheme.Colors.primaryBackground.ignoresSafeArea())
             .navigationTitle("ExpenseBoo")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("ExpenseBoo")
+                        .font(AppTheme.Fonts.headline(20))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                }
+            }
             .sheet(isPresented: $showingAddExpense) {
                 AddExpenseView()
             }
@@ -41,44 +50,50 @@ struct BalanceCard: View {
     }
     
     var body: some View {
-        VStack(spacing: 12) {
-            Text("Current Balance")
-                .font(.headline)
-                .foregroundColor(.secondary)
+        VStack(spacing: 16) {
+            Text(">> CURRENT_BALANCE")
+                .font(AppTheme.Fonts.caption(11))
+                .foregroundColor(AppTheme.Colors.electricCyan)
+                .tracking(2)
             
             Text("\(dataManager.currencySymbol)\(dataManager.getCurrentBalance(), specifier: "%.2f")")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(dataManager.getCurrentBalance() >= 0 ? .green : .red)
+                .font(AppTheme.Fonts.title(36))
+                .foregroundColor(dataManager.getCurrentBalance() >= 0 ? AppTheme.Colors.neonGreen : AppTheme.Colors.techOrange)
             
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Income")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+            HStack(spacing: 20) {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .foregroundColor(AppTheme.Colors.income)
+                        Text("INCOME")
+                            .font(AppTheme.Fonts.caption(10))
+                            .foregroundColor(AppTheme.Colors.income)
+                            .tracking(1)
+                    }
                     Text("\(dataManager.currencySymbol)\(dataManager.getCurrentMonthIncome(), specifier: "%.2f")")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.green)
+                        .font(AppTheme.Fonts.number(16))
+                        .foregroundColor(AppTheme.Colors.income)
                 }
                 
                 Spacer()
                 
-                VStack(alignment: .trailing) {
-                    Text("Expenses")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .trailing, spacing: 6) {
+                    HStack(spacing: 4) {
+                        Text("EXPENSE")
+                            .font(AppTheme.Fonts.caption(10))
+                            .foregroundColor(AppTheme.Colors.expense)
+                            .tracking(1)
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundColor(AppTheme.Colors.expense)
+                    }
                     Text("\(dataManager.currencySymbol)\(dataManager.getCurrentMonthExpenses().reduce(0) { $0 + $1.amount }, specifier: "%.2f")")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.red)
+                        .font(AppTheme.Fonts.number(16))
+                        .foregroundColor(AppTheme.Colors.expense)
                 }
             }
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(15)
-        .shadow(color: .gray.opacity(0.2), radius: 5, x: 0, y: 2)
+        .padding(20)
+        .techCard(glowColor: AppTheme.Colors.electricCyan)
     }
 }
 
@@ -90,37 +105,66 @@ struct QuickActionsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Quick Actions")
-                .font(.headline)
+            Text(">> QUICK_ACTIONS")
+                .font(AppTheme.Fonts.caption(11))
+                .foregroundColor(AppTheme.Colors.electricCyan)
+                .tracking(2)
 
-            VStack(spacing: 8) {
-                HStack(spacing: 12) {
+            VStack(spacing: 10) {
+                HStack(spacing: 10) {
                     Button(action: { showingAddExpense = true }) {
-                        Label("Add Expense", systemImage: "minus.circle.fill")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red.opacity(0.1))
-                            .foregroundColor(.red)
-                            .cornerRadius(10)
+                        HStack {
+                            Image(systemName: "minus.circle.fill")
+                            Text("EXPENSE")
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(1)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(AppTheme.Colors.expense.opacity(0.15))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(AppTheme.Colors.expense, lineWidth: 1.5)
+                        )
+                        .foregroundColor(AppTheme.Colors.expense)
                     }
 
                     Button(action: { showingAddIncome = true }) {
-                        Label("Add Income", systemImage: "plus.circle.fill")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.green.opacity(0.1))
-                            .foregroundColor(.green)
-                            .cornerRadius(10)
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                            Text("INCOME")
+                                .font(AppTheme.Fonts.body(13))
+                                .tracking(1)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(AppTheme.Colors.income.opacity(0.15))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(AppTheme.Colors.income, lineWidth: 1.5)
+                        )
+                        .foregroundColor(AppTheme.Colors.income)
                     }
                 }
 
                 Button(action: { showingAddInvestment = true }) {
-                    Label("Add Investment", systemImage: "chart.line.uptrend.xyaxis")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.purple.opacity(0.1))
-                        .foregroundColor(.purple)
-                        .cornerRadius(10)
+                    HStack {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                        Text("INVESTMENT")
+                            .font(AppTheme.Fonts.body(13))
+                            .tracking(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(AppTheme.Colors.investment.opacity(0.15))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(AppTheme.Colors.investment, lineWidth: 1.5)
+                    )
+                    .foregroundColor(AppTheme.Colors.investment)
                 }
             }
         }
@@ -146,24 +190,40 @@ struct RecentExpensesSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Recent Expenses")
-                    .font(.headline)
+                Text(">> RECENT_EXPENSES")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)
                 Spacer()
-                NavigationLink("See All", destination: ExpensesView())
-                    .font(.caption)
-                    .foregroundColor(.blue)
+                NavigationLink(destination: ExpensesView()) {
+                    Text("[VIEW_ALL]")
+                        .font(AppTheme.Fonts.caption(10))
+                        .foregroundColor(AppTheme.Colors.vibrantPurple)
+                        .tracking(1)
+                }
             }
             
             if recentExpenses.isEmpty {
-                Text("No expenses this month")
-                    .foregroundColor(.secondary)
-                    .padding()
+                VStack(spacing: 12) {
+                    Image(systemName: "doc.text")
+                        .font(.system(size: 40))
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.5))
+                    Text("// NO_EXPENSES_THIS_MONTH")
+                        .font(AppTheme.Fonts.caption())
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                        .tracking(1)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(20)
+                .techCard(glowColor: AppTheme.Colors.electricCyan.opacity(0.3))
             } else {
-                VStack(spacing: 8) {
+                VStack(spacing: 10) {
                     ForEach(recentExpenses) { expense in
                         ExpenseRowView(expense: expense)
                     }
                 }
+                .padding(12)
+                .techCard(glowColor: AppTheme.Colors.expense.opacity(0.4))
             }
         }
     }

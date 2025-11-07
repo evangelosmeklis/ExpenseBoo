@@ -59,38 +59,42 @@ struct IncomeRowView: View {
     @State private var showingEditIncome = false
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(dataManager.currencySymbol)\(income.amount, specifier: "%.2f")")
-                    .font(.headline)
-                    .foregroundColor(.green)
+                    .font(AppTheme.Fonts.number(16))
+                    .foregroundColor(AppTheme.Colors.income)
                 
                 HStack {
                     Text(income.date, style: .date)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(AppTheme.Fonts.caption(10))
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                     
                     if income.isMonthly {
-                        Text("• Monthly")
-                            .font(.caption)
-                            .foregroundColor(.blue)
+                        Text("• MONTHLY")
+                            .font(AppTheme.Fonts.caption(10))
+                            .foregroundColor(AppTheme.Colors.electricCyan)
+                            .tracking(0.5)
                     } else {
-                        Text("• One-time")
-                            .font(.caption)
-                            .foregroundColor(.orange)
+                        Text("• ONE-TIME")
+                            .font(AppTheme.Fonts.caption(10))
+                            .foregroundColor(AppTheme.Colors.techOrange)
+                            .tracking(0.5)
                     }
                 }
             }
             
             Spacer()
             
-            Button("Edit") {
+            Button("EDIT") {
                 showingEditIncome = true
             }
-            .font(.caption)
-            .foregroundColor(.blue)
+            .font(AppTheme.Fonts.caption(10))
+            .foregroundColor(AppTheme.Colors.income)
+            .tracking(1)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
         .sheet(isPresented: $showingEditIncome) {
             EditIncomeView(income: income)
         }

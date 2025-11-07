@@ -16,80 +16,139 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 
-                Section(header: Text("Financial Data")) {
+                Section(header: Text(">> FINANCIAL_DATA")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     Button("Manage Income") {
                         showingIncomeManagement = true
                     }
+                    .font(AppTheme.Fonts.body())
+                    .foregroundColor(AppTheme.Colors.income)
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                     
-                    Text("\(dataManager.incomes.count) income entries")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
+                    Text("[\(dataManager.incomes.count) ENTRIES]")
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
+                        .font(AppTheme.Fonts.caption(10))
+                        .tracking(1)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
 
                     Button("Manage Investments") {
                         showingInvestmentManagement = true
                     }
+                    .font(AppTheme.Fonts.body())
+                    .foregroundColor(AppTheme.Colors.investment)
+                    .listRowBackground(AppTheme.Colors.cardBackground)
 
-                    Text("\(dataManager.investments.count) investment entries")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
+                    Text("[\(dataManager.investments.count) ENTRIES]")
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
+                        .font(AppTheme.Fonts.caption(10))
+                        .tracking(1)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
 
                     Button("Manage Categories") {
                         showingCategoryManagement = true
                     }
+                    .font(AppTheme.Fonts.body())
+                    .foregroundColor(AppTheme.Colors.vibrantPurple)
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                     
-                    Text("\(dataManager.categories.count) categories")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
+                    Text("[\(dataManager.categories.count) CATEGORIES]")
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
+                        .font(AppTheme.Fonts.caption(10))
+                        .tracking(1)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
                     
                     Button("Manage Subscriptions") {
                         showingSubscriptionManagement = true
                     }
+                    .font(AppTheme.Fonts.body())
+                    .foregroundColor(AppTheme.Colors.techOrange)
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                     
-                    Text("\(dataManager.subscriptions.count) subscriptions")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
+                    Text("[\(dataManager.subscriptions.count) SUBSCRIPTIONS]")
+                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
+                        .font(AppTheme.Fonts.caption(10))
+                        .tracking(1)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
                 }
                 
-                Section(header: Text("Display")) {
+                Section(header: Text(">> DISPLAY")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     HStack {
                         Text("Currency")
+                            .font(AppTheme.Fonts.body())
                         Spacer()
                         Picker("Currency", selection: $tempSettings.currency) {
                             ForEach(Currency.allCases, id: \.self) { currency in
                                 Text("\(currency.symbol) \(currency.displayName)")
+                                    .font(AppTheme.Fonts.body())
                                     .tag(currency)
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
+                        .accentColor(AppTheme.Colors.electricCyan)
                     }
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                 }
                 
-                Section(header: Text("Notifications")) {
+                Section(header: Text(">> NOTIFICATIONS")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     Toggle("Enable Notifications", isOn: $tempSettings.notificationsEnabled)
+                        .font(AppTheme.Fonts.body())
+                        .tint(AppTheme.Colors.electricCyan)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
                     
                     if tempSettings.notificationsEnabled {
                         DatePicker("Daily Reminder", selection: $tempSettings.dailyNotificationTime, displayedComponents: .hourAndMinute)
+                            .font(AppTheme.Fonts.body())
+                            .accentColor(AppTheme.Colors.electricCyan)
+                            .listRowBackground(AppTheme.Colors.cardBackground)
                     }
                 }
                 
-                Section(header: Text("Data")) {
+                Section(header: Text(">> DATA")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     HStack {
                         Text("Total Expenses")
+                            .font(AppTheme.Fonts.body())
                         Spacer()
                         Text("\(dataManager.expenses.count)")
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.number())
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                     }
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                     
                     HStack {
                         Text("Total Income Entries")
+                            .font(AppTheme.Fonts.body())
                         Spacer()
                         Text("\(dataManager.incomes.count)")
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.number())
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                     }
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                     
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.Colors.primaryBackground)
             .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(">> SETTINGS")
+                        .font(AppTheme.Fonts.headline(18))
+                        .foregroundColor(AppTheme.Colors.electricCyan)
+                        .tracking(2)
+                }
+            }
             .onAppear {
                 tempSettings = dataManager.settings
                 dataManager.addSubscriptionExpenses()

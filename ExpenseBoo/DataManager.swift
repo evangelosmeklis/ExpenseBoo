@@ -407,9 +407,11 @@ class DataManager: ObservableObject {
         let totalExpenses = monthlyStats.reduce(0) { $0 + $1.expenses }
         let totalInvestments = monthlyStats.reduce(0) { $0 + $1.investments }
         let totalProfitLoss = monthlyStats.reduce(0) { $0 + $1.profitLoss }
+        let totalProfitLossWithoutInvestments = totalProfitLoss - totalInvestments
 
         let statsWithData = monthlyStats.filter { $0.income > 0 || $0.expenses > 0 || $0.profitLoss != 0 }
         let averageMonthlyPL = statsWithData.isEmpty ? 0 : totalProfitLoss / Double(statsWithData.count)
+        let averageMonthlyPLWithoutInvestments = statsWithData.isEmpty ? 0 : totalProfitLossWithoutInvestments / Double(statsWithData.count)
 
         let bestMonth = monthlyStats.max(by: { $0.profitLoss < $1.profitLoss })
         let worstMonth = monthlyStats.min(by: { $0.profitLoss < $1.profitLoss })
@@ -420,7 +422,9 @@ class DataManager: ObservableObject {
             totalExpenses: totalExpenses,
             totalInvestments: totalInvestments,
             totalProfitLoss: totalProfitLoss,
+            totalProfitLossWithoutInvestments: totalProfitLossWithoutInvestments,
             averageMonthlyPL: averageMonthlyPL,
+            averageMonthlyPLWithoutInvestments: averageMonthlyPLWithoutInvestments,
             bestMonth: bestMonth?.monthName ?? "N/A",
             worstMonth: worstMonth?.monthName ?? "N/A",
             bestMonthPL: bestMonth?.profitLoss ?? 0,

@@ -243,7 +243,9 @@ struct YearlyStats {
     let totalExpenses: Double
     let totalInvestments: Double
     let totalProfitLoss: Double
+    let totalProfitLossWithoutInvestments: Double
     let averageMonthlyPL: Double
+    let averageMonthlyPLWithoutInvestments: Double
     let bestMonth: String
     let worstMonth: String
     let bestMonthPL: Double
