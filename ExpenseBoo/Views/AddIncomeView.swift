@@ -21,6 +21,7 @@ struct AddIncomeView: View {
                             .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                         TextField("0.00", text: $amount)
                             .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                             .keyboardType(.decimalPad)
                             .onChange(of: amount) { oldValue, newValue in
                                 // Clean and format the input to handle decimals properly
@@ -31,14 +32,16 @@ struct AddIncomeView: View {
                             }
                     }
                     .listRowBackground(AppTheme.Colors.cardBackground)
-                    
+
                     DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
                         .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .accentColor(AppTheme.Colors.electricCyan)
                         .listRowBackground(AppTheme.Colors.cardBackground)
-                    
+
                     Toggle("Monthly Income", isOn: $isMonthly)
                         .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .tint(AppTheme.Colors.income)
                         .listRowBackground(AppTheme.Colors.cardBackground)
                 }

@@ -7,6 +7,22 @@
 
 import SwiftUI
 
+// MARK: - Color Extension for Adaptive Colors
+extension Color {
+    init(light: Color, dark: Color) {
+        self.init(UIColor { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .light, .unspecified:
+                return UIColor(light)
+            case .dark:
+                return UIColor(dark)
+            @unknown default:
+                return UIColor(light)
+            }
+        })
+    }
+}
+
 struct AppTheme {
     // MARK: - Colors
     struct Colors {
@@ -17,19 +33,38 @@ struct AppTheme {
         static let techOrange = Color(red: 1.0, green: 0.4, blue: 0.0)
         static let hotPink = Color(red: 1.0, green: 0.0, blue: 0.6)
         static let digitalYellow = Color(red: 1.0, green: 0.9, blue: 0.0)
-        
+
         // Semantic colors
         static let income = neonGreen
         static let expense = hotPink
         static let investment = vibrantPurple
         static let profit = neonGreen
         static let loss = techOrange
-        
-        // Background colors
-        static let cardBackground = Color(red: 0.08, green: 0.08, blue: 0.12)
-        static let primaryBackground = Color(red: 0.05, green: 0.05, blue: 0.08)
-        static let secondaryBackground = Color(red: 0.12, green: 0.12, blue: 0.18)
-        
+
+        // Adaptive background colors
+        static let cardBackground = Color(
+            light: Color(red: 0.95, green: 0.95, blue: 0.97),
+            dark: Color(red: 0.08, green: 0.08, blue: 0.12)
+        )
+        static let primaryBackground = Color(
+            light: Color(red: 0.98, green: 0.98, blue: 0.99),
+            dark: Color(red: 0.05, green: 0.05, blue: 0.08)
+        )
+        static let secondaryBackground = Color(
+            light: Color(red: 0.92, green: 0.92, blue: 0.95),
+            dark: Color(red: 0.12, green: 0.12, blue: 0.18)
+        )
+
+        // Adaptive text colors
+        static let primaryText = Color(
+            light: Color(red: 0.1, green: 0.1, blue: 0.1),
+            dark: Color(red: 0.95, green: 0.95, blue: 0.95)
+        )
+        static let secondaryText = Color(
+            light: Color(red: 0.4, green: 0.4, blue: 0.4),
+            dark: Color(red: 0.7, green: 0.7, blue: 0.7)
+        )
+
         // Border colors
         static let borderGlow = electricCyan.opacity(0.5)
         static let accentBorder = vibrantPurple.opacity(0.7)
@@ -39,13 +74,14 @@ struct AppTheme {
     struct Fonts {
         // Monospace/typewriter style fonts
         static let mono = "Menlo"
+        static let monoDigital = "SF Mono" // Digital/tech font for numbers
         
         static func title(_ size: CGFloat = 28) -> Font {
-            .custom(mono, size: size).weight(.bold)
+            .custom(monoDigital, size: size).weight(.heavy)
         }
         
         static func headline(_ size: CGFloat = 18) -> Font {
-            .custom(mono, size: size).weight(.semibold)
+            .custom(monoDigital, size: size).weight(.bold)
         }
         
         static func body(_ size: CGFloat = 15) -> Font {
@@ -57,7 +93,7 @@ struct AppTheme {
         }
         
         static func number(_ size: CGFloat = 15) -> Font {
-            .custom(mono, size: size).weight(.medium)
+            .custom(monoDigital, size: size).weight(.semibold)
         }
     }
     

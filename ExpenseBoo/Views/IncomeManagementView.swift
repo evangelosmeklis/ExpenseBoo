@@ -118,6 +118,7 @@ struct EditIncomeView: View {
                         Text(dataManager.currencySymbol)
                             .foregroundColor(.secondary)
                         TextField("0.00", text: $amount)
+                            .foregroundColor(AppTheme.Colors.primaryText)
                             .keyboardType(.decimalPad)
                             .onChange(of: amount) { oldValue, newValue in
                                 let filtered = newValue.replacingOccurrences(of: ",", with: ".")
@@ -126,10 +127,12 @@ struct EditIncomeView: View {
                                 }
                             }
                     }
-                    
+
                     DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
-                    
+                        .foregroundColor(AppTheme.Colors.primaryText)
+
                     Toggle("Monthly Income", isOn: $isMonthly)
+                        .foregroundColor(AppTheme.Colors.primaryText)
                 }
                 
                 Section {

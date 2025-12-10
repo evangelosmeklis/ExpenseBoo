@@ -143,6 +143,7 @@ struct ExpensesView: View {
                         HStack {
                             Text("INCOME:")
                                 .font(AppTheme.Fonts.body(13))
+                                .foregroundColor(AppTheme.Colors.primaryText)
                                 .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(incomeTotal, specifier: "%.2f")")
@@ -153,6 +154,7 @@ struct ExpensesView: View {
                         HStack {
                             Text("EXPENSES:")
                                 .font(AppTheme.Fonts.body(13))
+                                .foregroundColor(AppTheme.Colors.primaryText)
                                 .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(expenseTotal, specifier: "%.2f")")
@@ -163,6 +165,7 @@ struct ExpensesView: View {
                         HStack {
                             Text("INVESTMENTS:")
                                 .font(AppTheme.Fonts.body(13))
+                                .foregroundColor(AppTheme.Colors.primaryText)
                                 .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(investmentTotal, specifier: "%.2f")")
@@ -176,6 +179,7 @@ struct ExpensesView: View {
                         HStack {
                             Text("P/L:")
                                 .font(AppTheme.Fonts.headline(16))
+                                .foregroundColor(AppTheme.Colors.primaryText)
                                 .tracking(1)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(profitLoss, specifier: "%.2f")")
@@ -186,6 +190,7 @@ struct ExpensesView: View {
                         HStack {
                             Text("P/L w/o invest:")
                                 .font(AppTheme.Fonts.body(12))
+                                .foregroundColor(AppTheme.Colors.primaryText)
                                 .tracking(0.5)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(profitLossWithoutInvestments, specifier: "%.2f")")
@@ -322,44 +327,25 @@ struct ExpenseRowView: View {
     let expense: Expense
     @State private var showingEditExpense = false
     @State private var showingConversionAlert = false
-
-    var category: Category? {
-        dataManager.getCategoryById(expense.categoryId)
+    
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
     }
 
     var body: some View {
         HStack(spacing: 12) {
-            if let category = category {
-                Circle()
-                    .fill(category.color)
-                    .frame(width: 10, height: 10)
-                    .overlay(
-                        Circle()
-                            .stroke(category.color.opacity(0.5), lineWidth: 2)
-                            .blur(radius: 2)
-                    )
-            } else {
-                Circle()
-                    .fill(Color.gray)
-                    .frame(width: 10, height: 10)
-            }
-
             VStack(alignment: .leading, spacing: 4) {
                 Text(expense.comment)
                     .font(AppTheme.Fonts.body(14))
+                    .foregroundColor(AppTheme.Colors.primaryText)
 
-                HStack {
-                    Text(category?.name ?? "UNCATEGORIZED")
-                        .font(AppTheme.Fonts.caption(10))
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-                        .tracking(0.5)
-
-                    Spacer()
-
-                    Text(expense.date, style: .time)
-                        .font(AppTheme.Fonts.caption(10))
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.5))
-                }
+                Text(dateFormatter.string(from: expense.date))
+                    .font(AppTheme.Fonts.caption(10))
+                    .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                    .tracking(0.5)
             }
 
             Spacer()

@@ -6,7 +6,6 @@ struct AddExpenseView: View {
     
     @State private var amount: String = ""
     @State private var comment: String = ""
-    @State private var selectedCategory: Category?
     @State private var selectedDate = Date()
     
     var body: some View {
@@ -22,6 +21,7 @@ struct AddExpenseView: View {
                             .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                         TextField("0.00", text: $amount)
                             .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                             .keyboardType(.decimalPad)
                             .onChange(of: amount) { oldValue, newValue in
                                 // Clean and format the input to handle decimals properly
@@ -35,48 +35,14 @@ struct AddExpenseView: View {
                     
                     TextField("What did you buy?", text: $comment)
                         .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .listRowBackground(AppTheme.Colors.cardBackground)
                     
-                    DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
+                    DatePicker("Date & Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
                         .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .accentColor(AppTheme.Colors.electricCyan)
                         .listRowBackground(AppTheme.Colors.cardBackground)
-                }
-                
-                Section(header: Text(">> CATEGORY")
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(AppTheme.Colors.electricCyan)
-                    .tracking(2)) {
-                    if dataManager.categories.isEmpty {
-                        Text("NO_CATEGORIES_AVAILABLE")
-                            .font(AppTheme.Fonts.caption())
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.5))
-                            .tracking(1)
-                            .listRowBackground(AppTheme.Colors.cardBackground)
-                    } else {
-                        ForEach(dataManager.categories) { category in
-                            HStack {
-                                Circle()
-                                    .fill(category.color)
-                                    .frame(width: 12, height: 12)
-                                
-                                Text(category.name)
-                                    .font(AppTheme.Fonts.body())
-                                
-                                Spacer()
-                                
-                                if selectedCategory?.id == category.id {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(AppTheme.Colors.electricCyan)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                            .listRowBackground(AppTheme.Colors.cardBackground)
-                            .onTapGesture {
-                                selectedCategory = category
-                            }
-                        }
-                    }
                 }
             }
             .scrollContentBackground(.hidden)
@@ -119,7 +85,7 @@ struct AddExpenseView: View {
             amount: amountValue,
             comment: comment,
             date: selectedDate,
-            categoryId: selectedCategory?.id
+            categoryId: nil
         )
         
         dataManager.addExpense(expense)

@@ -57,6 +57,13 @@ struct InvestmentRowView: View {
     @EnvironmentObject var dataManager: DataManager
     let investment: Investment
     @State private var showingEditInvestment = false
+    
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -67,19 +74,12 @@ struct InvestmentRowView: View {
 
                 Text(investment.comment)
                     .font(AppTheme.Fonts.body(14))
+                    .foregroundColor(AppTheme.Colors.primaryText)
 
-                HStack {
-                    Text(investment.date, style: .date)
-                        .font(AppTheme.Fonts.caption(10))
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-
-                    if let categoryId = investment.categoryId,
-                       let category = dataManager.getCategoryById(categoryId) {
-                        Text("• \(category.name)")
-                            .font(AppTheme.Fonts.caption(10))
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-                    }
-                }
+                Text(dateFormatter.string(from: investment.date))
+                    .font(AppTheme.Fonts.caption(10))
+                    .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                    .tracking(0.5)
             }
 
             Spacer()
@@ -107,16 +107,21 @@ struct EditInvestmentView: View {
     @State private var amount: String = ""
     @State private var comment: String = ""
     @State private var selectedDate = Date()
-    @State private var selectedCategory: Category?
 
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Investment Details")) {
+                Section(header: Text(">> INVESTMENT_DETAILS")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     HStack {
                         Text(dataManager.currencySymbol)
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                         TextField("0.00", text: $amount)
+                            .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                             .keyboardType(.decimalPad)
                             .onChange(of: amount) { oldValue, newValue in
                                 let filtered = newValue.replacingOccurrences(of: ",", with: ".")
@@ -125,38 +130,18 @@ struct EditInvestmentView: View {
                                 }
                             }
                     }
+                    .listRowBackground(AppTheme.Colors.cardBackground)
 
                     TextField("What did you invest in?", text: $comment)
+                        .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
 
-                    DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
-                }
-
-                Section(header: Text("Category")) {
-                    if dataManager.categories.isEmpty {
-                        Text("No categories available")
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(dataManager.categories) { category in
-                            HStack {
-                                Circle()
-                                    .fill(category.color)
-                                    .frame(width: 12, height: 12)
-
-                                Text(category.name)
-
-                                Spacer()
-
-                                if selectedCategory?.id == category.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.purple)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedCategory = category
-                            }
-                        }
-                    }
+                    DatePicker("Date & Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                        .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
+                        .accentColor(AppTheme.Colors.electricCyan)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
                 }
 
                 Section {
@@ -164,29 +149,44 @@ struct EditInvestmentView: View {
                         dataManager.deleteInvestment(investment)
                         dismiss()
                     }
+                    .font(AppTheme.Fonts.body())
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.Colors.primaryBackground)
             .navigationTitle("Edit Investment")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(">> EDIT_INVESTMENT")
+                        .font(AppTheme.Fonts.headline(16))
+                        .foregroundColor(AppTheme.Colors.investment)
+                        .tracking(2)
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("CANCEL") {
+                        dismiss()
+                    }
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(1)
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("SAVE") {
+                        saveChanges()
+                    }
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(amount.isEmpty || comment.isEmpty ? AppTheme.Colors.electricCyan.opacity(0.3) : AppTheme.Colors.neonGreen)
+                    .tracking(1)
+                    .disabled(amount.isEmpty || comment.isEmpty)
+                }
+            }
             .onAppear {
                 amount = String(investment.amount)
                 comment = investment.comment
                 selectedDate = investment.date
-                selectedCategory = dataManager.getCategoryById(investment.categoryId)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveChanges()
-                    }
-                    .disabled(amount.isEmpty || comment.isEmpty)
-                }
             }
         }
     }
@@ -198,7 +198,7 @@ struct EditInvestmentView: View {
         updatedInvestment.amount = amountValue
         updatedInvestment.comment = comment
         updatedInvestment.date = selectedDate
-        updatedInvestment.categoryId = selectedCategory?.id
+        updatedInvestment.categoryId = nil
 
         dataManager.updateInvestment(updatedInvestment)
         dismiss()

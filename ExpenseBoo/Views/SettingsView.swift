@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var tempSettings: Settings
-    @State private var showingCategoryManagement = false
     @State private var showingIncomeManagement = false
     @State private var showingInvestmentManagement = false
     @State private var showingSubscriptionManagement = false
@@ -45,19 +44,6 @@ struct SettingsView: View {
                         .font(AppTheme.Fonts.caption(10))
                         .tracking(1)
                         .listRowBackground(AppTheme.Colors.cardBackground)
-
-                    Button("Manage Categories") {
-                        showingCategoryManagement = true
-                    }
-                    .font(AppTheme.Fonts.body())
-                    .foregroundColor(AppTheme.Colors.vibrantPurple)
-                    .listRowBackground(AppTheme.Colors.cardBackground)
-                    
-                    Text("[\(dataManager.categories.count) CATEGORIES]")
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
-                        .font(AppTheme.Fonts.caption(10))
-                        .tracking(1)
-                        .listRowBackground(AppTheme.Colors.cardBackground)
                     
                     Button("Manage Subscriptions") {
                         showingSubscriptionManagement = true
@@ -80,6 +66,7 @@ struct SettingsView: View {
                     HStack {
                         Text("Currency")
                             .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                         Spacer()
                         Picker("Currency", selection: $tempSettings.currency) {
                             ForEach(Currency.allCases, id: \.self) { currency in
@@ -100,12 +87,14 @@ struct SettingsView: View {
                     .tracking(2)) {
                     Toggle("Enable Notifications", isOn: $tempSettings.notificationsEnabled)
                         .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .tint(AppTheme.Colors.electricCyan)
                         .listRowBackground(AppTheme.Colors.cardBackground)
-                    
+
                     if tempSettings.notificationsEnabled {
                         DatePicker("Daily Reminder", selection: $tempSettings.dailyNotificationTime, displayedComponents: .hourAndMinute)
                             .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                             .accentColor(AppTheme.Colors.electricCyan)
                             .listRowBackground(AppTheme.Colors.cardBackground)
                     }
@@ -118,16 +107,18 @@ struct SettingsView: View {
                     HStack {
                         Text("Total Expenses")
                             .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                         Spacer()
                         Text("\(dataManager.expenses.count)")
                             .font(AppTheme.Fonts.number())
                             .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                     }
                     .listRowBackground(AppTheme.Colors.cardBackground)
-                    
+
                     HStack {
                         Text("Total Income Entries")
                             .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                         Spacer()
                         Text("\(dataManager.incomes.count)")
                             .font(AppTheme.Fonts.number())
@@ -155,9 +146,6 @@ struct SettingsView: View {
             }
             .onChange(of: tempSettings) { oldValue, newValue in
                 dataManager.updateSettings(newValue)
-            }
-            .sheet(isPresented: $showingCategoryManagement) {
-                CategoryManagementView()
             }
             .sheet(isPresented: $showingIncomeManagement) {
                 IncomeManagementView()

@@ -7,17 +7,22 @@ struct EditExpenseView: View {
     let expense: Expense
     @State private var amount: String = ""
     @State private var comment: String = ""
-    @State private var selectedCategory: Category?
     @State private var selectedDate = Date()
     
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Expense Details")) {
+                Section(header: Text(">> EXPENSE_DETAILS")
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(2)) {
                     HStack {
                         Text(dataManager.currencySymbol)
-                            .foregroundColor(.secondary)
+                            .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                         TextField("0.00", text: $amount)
+                            .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.primaryText)
                             .keyboardType(.decimalPad)
                             .onChange(of: amount) { oldValue, newValue in
                                 let filtered = newValue.replacingOccurrences(of: ",", with: ".")
@@ -26,38 +31,18 @@ struct EditExpenseView: View {
                                 }
                             }
                     }
-                    
+                    .listRowBackground(AppTheme.Colors.cardBackground)
+
                     TextField("What did you buy?", text: $comment)
-                    
-                    DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
-                }
-                
-                Section(header: Text("Category")) {
-                    if dataManager.categories.isEmpty {
-                        Text("No categories available")
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(dataManager.categories) { category in
-                            HStack {
-                                Circle()
-                                    .fill(category.color)
-                                    .frame(width: 12, height: 12)
-                                
-                                Text(category.name)
-                                
-                                Spacer()
-                                
-                                if selectedCategory?.id == category.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.blue)
-                                }
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedCategory = category
-                            }
-                        }
-                    }
+                        .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
+
+                    DatePicker("Date & Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                        .font(AppTheme.Fonts.body())
+                        .foregroundColor(AppTheme.Colors.primaryText)
+                        .accentColor(AppTheme.Colors.electricCyan)
+                        .listRowBackground(AppTheme.Colors.cardBackground)
                 }
                 
                 Section {
@@ -65,29 +50,44 @@ struct EditExpenseView: View {
                         dataManager.deleteExpense(expense)
                         dismiss()
                     }
+                    .font(AppTheme.Fonts.body())
+                    .listRowBackground(AppTheme.Colors.cardBackground)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(AppTheme.Colors.primaryBackground)
             .navigationTitle("Edit Expense")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(">> EDIT_EXPENSE")
+                        .font(AppTheme.Fonts.headline(16))
+                        .foregroundColor(AppTheme.Colors.expense)
+                        .tracking(2)
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("CANCEL") {
+                        dismiss()
+                    }
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(AppTheme.Colors.electricCyan)
+                    .tracking(1)
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("SAVE") {
+                        saveChanges()
+                    }
+                    .font(AppTheme.Fonts.caption(11))
+                    .foregroundColor(amount.isEmpty || comment.isEmpty ? AppTheme.Colors.electricCyan.opacity(0.3) : AppTheme.Colors.neonGreen)
+                    .tracking(1)
+                    .disabled(amount.isEmpty || comment.isEmpty)
+                }
+            }
             .onAppear {
                 amount = String(expense.amount)
                 comment = expense.comment
                 selectedDate = expense.date
-                selectedCategory = dataManager.getCategoryById(expense.categoryId)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveChanges()
-                    }
-                    .disabled(amount.isEmpty || comment.isEmpty)
-                }
             }
         }
     }
@@ -99,7 +99,7 @@ struct EditExpenseView: View {
         updatedExpense.amount = amountValue
         updatedExpense.comment = comment
         updatedExpense.date = selectedDate
-        updatedExpense.categoryId = selectedCategory?.id
+        updatedExpense.categoryId = nil
         
         dataManager.updateExpense(updatedExpense)
         dismiss()
