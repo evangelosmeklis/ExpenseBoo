@@ -15,54 +15,49 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 
-                Section(header: Text(">> FINANCIAL_DATA")
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(AppTheme.Colors.electricCyan)
-                    .tracking(2)) {
+                Section(header: Text("Financial Data")
+                    .font(AppTheme.Fonts.caption(13))
+                    .foregroundColor(AppTheme.Colors.secondaryText)) {
                     Button("Manage Income") {
                         showingIncomeManagement = true
                     }
                     .font(AppTheme.Fonts.body())
-                    .foregroundColor(AppTheme.Colors.income)
+                    .foregroundColor(AppTheme.Colors.primaryText)
                     .listRowBackground(AppTheme.Colors.cardBackground)
                     
-                    Text("[\(dataManager.incomes.count) ENTRIES]")
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
-                        .font(AppTheme.Fonts.caption(10))
-                        .tracking(1)
+                    Text("\(dataManager.incomes.count) entries")
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .font(AppTheme.Fonts.caption())
                         .listRowBackground(AppTheme.Colors.cardBackground)
 
                     Button("Manage Investments") {
                         showingInvestmentManagement = true
                     }
                     .font(AppTheme.Fonts.body())
-                    .foregroundColor(AppTheme.Colors.investment)
+                    .foregroundColor(AppTheme.Colors.primaryText)
                     .listRowBackground(AppTheme.Colors.cardBackground)
 
-                    Text("[\(dataManager.investments.count) ENTRIES]")
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
-                        .font(AppTheme.Fonts.caption(10))
-                        .tracking(1)
+                    Text("\(dataManager.investments.count) entries")
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .font(AppTheme.Fonts.caption())
                         .listRowBackground(AppTheme.Colors.cardBackground)
                     
                     Button("Manage Subscriptions") {
                         showingSubscriptionManagement = true
                     }
                     .font(AppTheme.Fonts.body())
-                    .foregroundColor(AppTheme.Colors.techOrange)
+                    .foregroundColor(AppTheme.Colors.primaryText)
                     .listRowBackground(AppTheme.Colors.cardBackground)
                     
-                    Text("[\(dataManager.subscriptions.count) SUBSCRIPTIONS]")
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
-                        .font(AppTheme.Fonts.caption(10))
-                        .tracking(1)
+                    Text("\(dataManager.subscriptions.count) subscriptions")
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .font(AppTheme.Fonts.caption())
                         .listRowBackground(AppTheme.Colors.cardBackground)
                 }
                 
-                Section(header: Text(">> DISPLAY")
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(AppTheme.Colors.electricCyan)
-                    .tracking(2)) {
+                Section(header: Text("Display")
+                    .font(AppTheme.Fonts.caption(13))
+                    .foregroundColor(AppTheme.Colors.secondaryText)) {
                     HStack {
                         Text("Currency")
                             .font(AppTheme.Fonts.body())
@@ -76,15 +71,14 @@ struct SettingsView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
-                        .accentColor(AppTheme.Colors.electricCyan)
+                        .tint(AppTheme.Colors.electricCyan)
                     }
                     .listRowBackground(AppTheme.Colors.cardBackground)
                 }
                 
-                Section(header: Text(">> NOTIFICATIONS")
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(AppTheme.Colors.electricCyan)
-                    .tracking(2)) {
+                Section(header: Text("Notifications")
+                    .font(AppTheme.Fonts.caption(13))
+                    .foregroundColor(AppTheme.Colors.secondaryText)) {
                     Toggle("Enable Notifications", isOn: $tempSettings.notificationsEnabled)
                         .font(AppTheme.Fonts.body())
                         .foregroundColor(AppTheme.Colors.primaryText)
@@ -95,15 +89,14 @@ struct SettingsView: View {
                         DatePicker("Daily Reminder", selection: $tempSettings.dailyNotificationTime, displayedComponents: .hourAndMinute)
                             .font(AppTheme.Fonts.body())
                             .foregroundColor(AppTheme.Colors.primaryText)
-                            .accentColor(AppTheme.Colors.electricCyan)
+                            .tint(AppTheme.Colors.electricCyan)
                             .listRowBackground(AppTheme.Colors.cardBackground)
                     }
                 }
                 
-                Section(header: Text(">> DATA")
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(AppTheme.Colors.electricCyan)
-                    .tracking(2)) {
+                Section(header: Text("Data Stats")
+                    .font(AppTheme.Fonts.caption(13))
+                    .foregroundColor(AppTheme.Colors.secondaryText)) {
                     HStack {
                         Text("Total Expenses")
                             .font(AppTheme.Fonts.body())
@@ -111,7 +104,7 @@ struct SettingsView: View {
                         Spacer()
                         Text("\(dataManager.expenses.count)")
                             .font(AppTheme.Fonts.number())
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                            .foregroundColor(AppTheme.Colors.secondaryText)
                     }
                     .listRowBackground(AppTheme.Colors.cardBackground)
 
@@ -122,7 +115,7 @@ struct SettingsView: View {
                         Spacer()
                         Text("\(dataManager.incomes.count)")
                             .font(AppTheme.Fonts.number())
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
+                            .foregroundColor(AppTheme.Colors.secondaryText)
                     }
                     .listRowBackground(AppTheme.Colors.cardBackground)
                     
@@ -134,10 +127,9 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(">> SETTINGS")
+                    Text("Settings")
                         .font(AppTheme.Fonts.headline(18))
                         .foregroundColor(AppTheme.Colors.electricCyan)
-                        .tracking(2)
                 }
             }
             .onAppear {

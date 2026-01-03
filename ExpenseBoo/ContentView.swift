@@ -45,7 +45,7 @@ struct ContentView: View {
                 }
                 .tag(3)
         }
-        .accentColor(AppTheme.Colors.electricCyan)
+        .tint(AppTheme.Colors.electricCyan)
     }
 }
 

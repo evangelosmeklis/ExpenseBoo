@@ -2,7 +2,7 @@
 //  Theme.swift
 //  ExpenseBoo
 //
-//  Tech-inspired theme with vibrant colors and monospace fonts
+//  Modern Premium Theme with Glassmorphism and Rounded Typography
 //
 
 import SwiftUI
@@ -23,93 +23,132 @@ extension Color {
     }
 }
 
+// MARK: - Linear Gradient Extension
+extension LinearGradient {
+    static let primaryBackground = LinearGradient(
+        gradient: Gradient(colors: [
+            Color(red: 0.1, green: 0.1, blue: 0.2), // Deep Indigo
+            Color(red: 0.05, green: 0.05, blue: 0.1)  // Almost Black
+        ]),
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    static let incomeCard = LinearGradient(
+        gradient: Gradient(colors: [
+            Color.teal.opacity(0.8),
+            Color.green.opacity(0.6)
+        ]),
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
+    static let expenseCard = LinearGradient(
+        gradient: Gradient(colors: [
+            Color.pink.opacity(0.8),
+            Color.red.opacity(0.6)
+        ]),
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+}
+
 struct AppTheme {
     // MARK: - Colors
     struct Colors {
-        // Vibrant tech colors
-        static let neonGreen = Color(red: 0.0, green: 1.0, blue: 0.5)
-        static let electricCyan = Color(red: 0.0, green: 0.9, blue: 1.0)
-        static let vibrantPurple = Color(red: 0.6, green: 0.2, blue: 1.0)
-        static let techOrange = Color(red: 1.0, green: 0.4, blue: 0.0)
-        static let hotPink = Color(red: 1.0, green: 0.0, blue: 0.6)
-        static let digitalYellow = Color(red: 1.0, green: 0.9, blue: 0.0)
+        // New Modern Palette (Defined first for self-reference)
+        static let emerald = Color(red: 0.2, green: 0.8, blue: 0.5)
+        static let skyBlue = Color(red: 0.2, green: 0.6, blue: 1.0)
+        static let royalPurple = Color(red: 0.5, green: 0.3, blue: 0.9)
+        static let sunsetOrange = Color(red: 1.0, green: 0.5, blue: 0.3)
+        static let rosePink = Color(red: 1.0, green: 0.3, blue: 0.5)
+        static let sunflower = Color(red: 1.0, green: 0.8, blue: 0.2)
+        
+        // Modern Palette Mapped to Old Names for Compatibility
+        static let neonGreen = emerald
+        static let electricCyan = skyBlue
+        static let vibrantPurple = royalPurple
+        static let techOrange = sunsetOrange
+        static let hotPink = rosePink
+        static let digitalYellow = sunflower
+        
 
         // Semantic colors
-        static let income = neonGreen
-        static let expense = hotPink
-        static let investment = vibrantPurple
-        static let profit = neonGreen
-        static let loss = techOrange
+        static let income = emerald
+        static let expense = rosePink
+        static let investment = royalPurple
+        static let profit = emerald
+        static let loss = sunsetOrange
 
         // Adaptive background colors
         static let cardBackground = Color(
-            light: Color(red: 0.95, green: 0.95, blue: 0.97),
-            dark: Color(red: 0.08, green: 0.08, blue: 0.12)
+            light: Color.white,
+            dark: Color(red: 0.12, green: 0.12, blue: 0.15)
         )
+        
         static let primaryBackground = Color(
-            light: Color(red: 0.98, green: 0.98, blue: 0.99),
+            light: Color(red: 0.96, green: 0.96, blue: 0.98),
             dark: Color(red: 0.05, green: 0.05, blue: 0.08)
         )
+        
         static let secondaryBackground = Color(
-            light: Color(red: 0.92, green: 0.92, blue: 0.95),
-            dark: Color(red: 0.12, green: 0.12, blue: 0.18)
+            light: Color(red: 0.92, green: 0.92, blue: 0.94),
+            dark: Color(red: 0.15, green: 0.15, blue: 0.2)
         )
 
         // Adaptive text colors
         static let primaryText = Color(
-            light: Color(red: 0.1, green: 0.1, blue: 0.1),
-            dark: Color(red: 0.95, green: 0.95, blue: 0.95)
+            light: Color(red: 0.1, green: 0.1, blue: 0.15),
+            dark: Color(red: 0.98, green: 0.98, blue: 1.0)
         )
+        
         static let secondaryText = Color(
-            light: Color(red: 0.4, green: 0.4, blue: 0.4),
-            dark: Color(red: 0.7, green: 0.7, blue: 0.7)
+            light: Color(red: 0.5, green: 0.5, blue: 0.6),
+            dark: Color(red: 0.6, green: 0.6, blue: 0.7)
         )
 
-        // Border colors
-        static let borderGlow = electricCyan.opacity(0.5)
-        static let accentBorder = vibrantPurple.opacity(0.7)
+        // Border colors (Kept for compatibility, but made subtle)
+        static let borderGlow = skyBlue.opacity(0.3)
+        static let accentBorder = royalPurple.opacity(0.3)
     }
     
     // MARK: - Fonts
     struct Fonts {
-        // Monospace/typewriter style fonts
-        static let mono = "Menlo"
-        static let monoDigital = "SF Mono" // Digital/tech font for numbers
+        // Mapped to System Rounded
+        static let mono = "System Rounded" // Placeholder string, usage below implies Font
+        static let monoDigital = "System Rounded" 
         
-        static func title(_ size: CGFloat = 28) -> Font {
-            .custom(monoDigital, size: size).weight(.heavy)
+        static func title(_ size: CGFloat = 34) -> Font {
+            .system(size: size, weight: .bold, design: .rounded)
         }
         
-        static func headline(_ size: CGFloat = 18) -> Font {
-            .custom(monoDigital, size: size).weight(.bold)
+        static func headline(_ size: CGFloat = 20) -> Font {
+            .system(size: size, weight: .semibold, design: .rounded)
         }
         
-        static func body(_ size: CGFloat = 15) -> Font {
-            .custom(mono, size: size).weight(.regular)
+        static func body(_ size: CGFloat = 17) -> Font {
+            .system(size: size, weight: .medium, design: .rounded)
         }
         
-        static func caption(_ size: CGFloat = 12) -> Font {
-            .custom(mono, size: size).weight(.light)
+        static func caption(_ size: CGFloat = 13) -> Font {
+            .system(size: size, weight: .regular, design: .rounded)
         }
         
-        static func number(_ size: CGFloat = 15) -> Font {
-            .custom(monoDigital, size: size).weight(.semibold)
+        static func number(_ size: CGFloat = 17) -> Font {
+            .system(size: size, weight: .bold, design: .rounded)
         }
     }
     
     // MARK: - Card Styles
     struct CardStyle: ViewModifier {
-        var glowColor: Color = AppTheme.Colors.borderGlow
+        var glowColor: Color = AppTheme.Colors.borderGlow // Param kept for API compatibility, unused in new style
         
         func body(content: Content) -> some View {
             content
-                .background(AppTheme.Colors.cardBackground)
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(glowColor, lineWidth: 1.5)
-                )
-                .shadow(color: glowColor.opacity(0.3), radius: 8, x: 0, y: 4)
+                .background(.ultraThinMaterial)
+                .background(AppTheme.Colors.cardBackground.opacity(0.5)) // Fallback/Tint
+                .cornerRadius(20)
+                .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
         }
     }
     
@@ -121,17 +160,14 @@ struct AppTheme {
         func body(content: Content) -> some View {
             content
                 .font(AppTheme.Fonts.body())
-                .foregroundColor(isDestructive ? .white : color)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
                 .background(
-                    isDestructive ? color.opacity(0.2) : color.opacity(0.15)
+                    isDestructive ? Color.red : color
                 )
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(color, lineWidth: 1.5)
-                )
+                .cornerRadius(30) // Pill shape
+                .shadow(color: (isDestructive ? Color.red : color).opacity(0.4), radius: 8, x: 0, y: 4)
         }
     }
 }
@@ -154,13 +190,9 @@ struct TechTextFieldStyle: TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .font(AppTheme.Fonts.body())
-            .padding(12)
-            .background(AppTheme.Colors.secondaryBackground)
-            .cornerRadius(8)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(color, lineWidth: 1)
-            )
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
     }
 }
 
