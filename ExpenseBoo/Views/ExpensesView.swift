@@ -129,111 +129,107 @@ struct ExpensesView: View {
                     if selectedPeriod == 1 {
                         HStack {
                             Button(action: { showingDatePicker = true }) {
-                                Text("From: \(startDate, formatter: dateFormatter) - To: \(endDate, formatter: dateFormatter)")
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                                    .padding(.horizontal)
+                                HStack {
+                                    Image(systemName: "calendar")
+                                    Text("\(startDate, formatter: dateFormatter) - \(endDate, formatter: dateFormatter)")
+                                }
+                                .font(AppTheme.Fonts.caption(12))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(AppTheme.Colors.secondaryBackground)
+                                .cornerRadius(20)
+                                .foregroundColor(AppTheme.Colors.primaryText)
                             }
                             Spacer()
                         }
+                        .padding(.horizontal)
                     }
                     
                     // P/L Summary
-                    VStack(spacing: 10) {
-                        HStack {
-                            Text("INCOME:")
-                                .font(AppTheme.Fonts.body(13))
-                                .foregroundColor(AppTheme.Colors.primaryText)
-                                .tracking(1)
-                            Spacer()
-                            Text("\(dataManager.currencySymbol)\(incomeTotal, specifier: "%.2f")")
-                                .font(AppTheme.Fonts.number(14))
-                                .foregroundColor(AppTheme.Colors.income)
-                        }
-
-                        HStack {
-                            Text("EXPENSES:")
-                                .font(AppTheme.Fonts.body(13))
-                                .foregroundColor(AppTheme.Colors.primaryText)
-                                .tracking(1)
-                            Spacer()
-                            Text("\(dataManager.currencySymbol)\(expenseTotal, specifier: "%.2f")")
-                                .font(AppTheme.Fonts.number(14))
-                                .foregroundColor(AppTheme.Colors.expense)
-                        }
-
-                        HStack {
-                            Text("INVESTMENTS:")
-                                .font(AppTheme.Fonts.body(13))
-                                .foregroundColor(AppTheme.Colors.primaryText)
-                                .tracking(1)
-                            Spacer()
-                            Text("\(dataManager.currencySymbol)\(investmentTotal, specifier: "%.2f")")
-                                .font(AppTheme.Fonts.number(14))
-                                .foregroundColor(AppTheme.Colors.investment)
-                        }
-
-                        Divider()
-                            .background(AppTheme.Colors.electricCyan.opacity(0.3))
-
-                        HStack {
-                            Text("P/L:")
-                                .font(AppTheme.Fonts.headline(16))
-                                .foregroundColor(AppTheme.Colors.primaryText)
-                                .tracking(1)
-                            Spacer()
-                            Text("\(dataManager.currencySymbol)\(profitLoss, specifier: "%.2f")")
-                                .font(AppTheme.Fonts.headline(16))
+                    VStack(spacing: 16) {
+                        HStack(spacing: 0) {
+                            Text(dataManager.currencySymbol)
+                                .font(AppTheme.Fonts.title(24))
+                                .foregroundColor(profitLoss >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
+                            Text("\(abs(profitLoss), specifier: "%.2f")")
+                                .font(AppTheme.Fonts.title(40))
                                 .foregroundColor(profitLoss >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
                         }
+                        .padding(.vertical, 4)
+
+                        HStack(spacing: 32) {
+                            VStack(spacing: 4) {
+                                Text("Income")
+                                    .font(AppTheme.Fonts.caption(12))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                Text("\(dataManager.currencySymbol)\(incomeTotal, specifier: "%.2f")")
+                                    .font(AppTheme.Fonts.headline(16))
+                                    .foregroundColor(AppTheme.Colors.income)
+                            }
+
+                            VStack(spacing: 4) {
+                                Text("Expenses")
+                                    .font(AppTheme.Fonts.caption(12))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                Text("\(dataManager.currencySymbol)\(expenseTotal, specifier: "%.2f")")
+                                    .font(AppTheme.Fonts.headline(16))
+                                    .foregroundColor(AppTheme.Colors.expense)
+                            }
+
+                            VStack(spacing: 4) {
+                                Text("Investments")
+                                    .font(AppTheme.Fonts.caption(12))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                Text("\(dataManager.currencySymbol)\(investmentTotal, specifier: "%.2f")")
+                                    .font(AppTheme.Fonts.headline(16))
+                                    .foregroundColor(AppTheme.Colors.investment)
+                            }
+                        }
+                        
+                        Divider()
+                            .overlay(AppTheme.Colors.secondaryText.opacity(0.1))
 
                         HStack {
-                            Text("P/L w/o invest:")
-                                .font(AppTheme.Fonts.body(12))
-                                .foregroundColor(AppTheme.Colors.primaryText)
-                                .tracking(0.5)
+                            Text("Net P/L (w/o invest)")
+                                .font(AppTheme.Fonts.caption(12))
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                             Spacer()
                             Text("\(dataManager.currencySymbol)\(profitLossWithoutInvestments, specifier: "%.2f")")
-                                .font(AppTheme.Fonts.number(13))
+                                .font(AppTheme.Fonts.body(14))
                                 .foregroundColor(profitLossWithoutInvestments >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
                         }
                     }
-                    .padding(16)
-                    .techCard(glowColor: AppTheme.Colors.vibrantPurple.opacity(0.5))
+                    .padding(24)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(24)
+                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
                 }
                 
                 if filteredExpenses.isEmpty && filteredIncomes.isEmpty && filteredInvestments.isEmpty {
-                    VStack(spacing: 20) {
-                        Image(systemName: "list.bullet")
-                            .font(.system(size: 50))
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.5))
+                    VStack(spacing: 16) {
+                        Image(systemName: "list.bullet.clipboard")
+                            .font(.system(size: 48))
+                            .foregroundColor(AppTheme.Colors.secondaryText.opacity(0.3))
 
-                        Text("// NO_TRANSACTIONS_YET")
-                            .font(AppTheme.Fonts.headline(16))
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.8))
-                            .tracking(1)
+                        Text("No Transactions Yet")
+                            .font(AppTheme.Fonts.headline(18))
+                            .foregroundColor(AppTheme.Colors.primaryText)
 
-                        Text("Start adding income, expenses, and investments")
-                            .font(AppTheme.Fonts.caption())
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.6))
+                        Text("Start tracking your finances by adding new entries.")
+                            .font(AppTheme.Fonts.body())
+                            .foregroundColor(AppTheme.Colors.secondaryText)
                             .multilineTextAlignment(.center)
+                            .padding(.horizontal)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(AppTheme.Colors.primaryBackground)
                 } else {
                     List {
                         // Income Section
                         if !filteredIncomes.isEmpty {
-                            Section(header: HStack {
-                                Text("Income")
-                                    .font(.headline)
-                                    .foregroundColor(.green)
-                                Spacer()
-                                Text("\(dataManager.currencySymbol)\(incomeTotal, specifier: "%.2f")")
-                                    .font(.subheadline)
-                                    .foregroundColor(.green)
-                            }) {
+                            Section(header: Text("Income")
+                                .font(AppTheme.Fonts.headline(14))
+                                .foregroundColor(AppTheme.Colors.secondaryText)) {
                                 ForEach(filteredIncomes) { income in
                                     IncomeRowView(income: income)
                                 }
@@ -242,15 +238,9 @@ struct ExpensesView: View {
 
                         // Expenses Section
                         if !filteredExpenses.isEmpty {
-                            Section(header: HStack {
-                                Text("Expenses")
-                                    .font(.headline)
-                                    .foregroundColor(.red)
-                                Spacer()
-                                Text("\(dataManager.currencySymbol)\(expenseTotal, specifier: "%.2f")")
-                                    .font(.subheadline)
-                                    .foregroundColor(.red)
-                            }) {
+                            Section(header: Text("Expenses")
+                                .font(AppTheme.Fonts.headline(14))
+                                .foregroundColor(AppTheme.Colors.secondaryText)) {
                                 ForEach(filteredExpenses) { expense in
                                     ExpenseRowView(expense: expense)
                                 }
@@ -259,37 +249,27 @@ struct ExpensesView: View {
 
                         // Investments Section
                         if !filteredInvestments.isEmpty {
-                            Section(header: HStack {
-                                Text("Investments")
-                                    .font(.headline)
-                                    .foregroundColor(.purple)
-                                Spacer()
-                                Text("\(dataManager.currencySymbol)\(investmentTotal, specifier: "%.2f")")
-                                    .font(.subheadline)
-                                    .foregroundColor(.purple)
-                            }) {
+                            Section(header: Text("Investments")
+                                .font(AppTheme.Fonts.headline(14))
+                                .foregroundColor(AppTheme.Colors.secondaryText)) {
                                 ForEach(filteredInvestments) { investment in
                                     InvestmentRowView(investment: investment)
                                 }
                             }
                         }
                     }
+                    .scrollContentBackground(.hidden)
                 }
             }
             .background(AppTheme.Colors.primaryBackground.ignoresSafeArea())
             .navigationTitle("P/L")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text(">> P/L")
-                        .font(AppTheme.Fonts.headline(18))
-                        .foregroundColor(AppTheme.Colors.electricCyan)
-                        .tracking(2)
-                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddExpense = true }) {
                         Image(systemName: "plus.circle.fill")
-                            .foregroundColor(AppTheme.Colors.electricCyan)
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, AppTheme.Colors.electricCyan)
                     }
                 }
             }
@@ -331,31 +311,39 @@ struct ExpenseRowView: View {
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
-        formatter.timeStyle = .short
+        formatter.timeStyle = .none
         return formatter
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 16) {
+            // Icon Placeholder
+            Circle()
+                .fill(AppTheme.Colors.expense.opacity(0.1))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: "minus")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(AppTheme.Colors.expense)
+                )
+
             VStack(alignment: .leading, spacing: 4) {
-                Text(expense.comment)
-                    .font(AppTheme.Fonts.body(14))
+                Text(expense.comment.isEmpty ? (dataManager.getCategoryById(expense.categoryId)?.name ?? "Expense") : expense.comment)
+                    .font(AppTheme.Fonts.body(16))
                     .foregroundColor(AppTheme.Colors.primaryText)
 
                 Text(dateFormatter.string(from: expense.date))
-                    .font(AppTheme.Fonts.caption(10))
-                    .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-                    .tracking(0.5)
+                    .font(AppTheme.Fonts.caption(12))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
             }
 
             Spacer()
 
-            Text("\(dataManager.currencySymbol)\(expense.amount, specifier: "%.2f")")
-                .font(AppTheme.Fonts.number(14))
-                .foregroundColor(AppTheme.Colors.expense)
+            Text("-\(dataManager.currencySymbol)\(expense.amount, specifier: "%.2f")")
+                .font(AppTheme.Fonts.number(16))
+                .foregroundColor(AppTheme.Colors.primaryText)
         }
         .padding(.vertical, 8)
-        .padding(.horizontal, 4)
         .contentShape(Rectangle())
         .onTapGesture {
             showingEditExpense = true
@@ -380,6 +368,8 @@ struct ExpenseRowView: View {
         } message: {
             Text("This will convert this expense to an investment. This action cannot be undone.")
         }
+        .listRowBackground(Color.clear)
+        .listRowSeparatorTint(AppTheme.Colors.secondaryText.opacity(0.2))
     }
 }
 

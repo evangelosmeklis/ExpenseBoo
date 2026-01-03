@@ -61,41 +61,48 @@ struct InvestmentRowView: View {
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
-        formatter.timeStyle = .short
+        formatter.timeStyle = .none
         return formatter
     }
 
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(dataManager.currencySymbol)\(investment.amount, specifier: "%.2f")")
-                    .font(AppTheme.Fonts.number(16))
-                    .foregroundColor(AppTheme.Colors.investment)
+        HStack(spacing: 16) {
+            // Icon
+            Circle()
+                .fill(AppTheme.Colors.investment.opacity(0.1))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(AppTheme.Colors.investment)
+                )
 
-                Text(investment.comment)
-                    .font(AppTheme.Fonts.body(14))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(investment.comment.isEmpty ? "Investment" : investment.comment)
+                    .font(AppTheme.Fonts.body(16))
                     .foregroundColor(AppTheme.Colors.primaryText)
 
                 Text(dateFormatter.string(from: investment.date))
-                    .font(AppTheme.Fonts.caption(10))
-                    .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-                    .tracking(0.5)
+                    .font(AppTheme.Fonts.caption(12))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
             }
 
             Spacer()
 
-            Button("EDIT") {
-                showingEditInvestment = true
-            }
-            .font(AppTheme.Fonts.caption(10))
-            .foregroundColor(AppTheme.Colors.investment)
-            .tracking(1)
+            Text("\(dataManager.currencySymbol)\(investment.amount, specifier: "%.2f")")
+                .font(AppTheme.Fonts.number(16))
+                .foregroundColor(AppTheme.Colors.primaryText)
         }
         .padding(.vertical, 8)
-        .padding(.horizontal, 4)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showingEditInvestment = true
+        }
         .sheet(isPresented: $showingEditInvestment) {
             EditInvestmentView(investment: investment)
         }
+        .listRowBackground(Color.clear)
+        .listRowSeparatorTint(AppTheme.Colors.secondaryText.opacity(0.2))
     }
 }
 
@@ -111,10 +118,9 @@ struct EditInvestmentView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text(">> INVESTMENT_DETAILS")
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(AppTheme.Colors.electricCyan)
-                    .tracking(2)) {
+                Section(header: Text("Investment Details")
+                    .font(AppTheme.Fonts.caption(12))
+                    .foregroundColor(AppTheme.Colors.secondaryText)) {
                     HStack {
                         Text(dataManager.currencySymbol)
                             .font(AppTheme.Fonts.body())
@@ -159,27 +165,22 @@ struct EditInvestmentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(">> EDIT_INVESTMENT")
+                    Text("Edit Investment")
                         .font(AppTheme.Fonts.headline(16))
-                        .foregroundColor(AppTheme.Colors.investment)
-                        .tracking(2)
+                        .foregroundColor(AppTheme.Colors.primaryText)
                 }
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("CANCEL") {
+                    Button("Cancel") {
                         dismiss()
                     }
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(AppTheme.Colors.electricCyan)
-                    .tracking(1)
+                    .font(AppTheme.Fonts.body())
                 }
 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("SAVE") {
+                    Button("Save") {
                         saveChanges()
                     }
-                    .font(AppTheme.Fonts.caption(11))
-                    .foregroundColor(amount.isEmpty || comment.isEmpty ? AppTheme.Colors.electricCyan.opacity(0.3) : AppTheme.Colors.neonGreen)
-                    .tracking(1)
+                    .font(AppTheme.Fonts.body())
                     .disabled(amount.isEmpty || comment.isEmpty)
                 }
             }

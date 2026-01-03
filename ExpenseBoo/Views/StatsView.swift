@@ -47,22 +47,33 @@ struct StatsView: View {
 
                 // Year Picker
                 HStack {
-                    Text(">> YEAR:")
-                        .font(AppTheme.Fonts.body(14))
-                        .foregroundColor(AppTheme.Colors.electricCyan)
-                        .tracking(2)
+                    Text("YEAR")
+                        .font(AppTheme.Fonts.caption(12))
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .padding(.leading, 8)
 
                     Spacer()
 
-                    Picker("Year", selection: $selectedYear) {
+                    Menu {
                         ForEach(availableYears, id: \.self) { year in
-                            Text(String(year))
-                                .font(AppTheme.Fonts.body())
-                                .tag(year)
+                            Button(String(year)) {
+                                selectedYear = year
+                            }
                         }
+                    } label: {
+                        HStack {
+                            Text(String(selectedYear))
+                                .font(AppTheme.Fonts.body(16))
+                                .foregroundColor(AppTheme.Colors.primaryText)
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                                .foregroundColor(AppTheme.Colors.secondaryText)
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(AppTheme.Colors.secondaryBackground)
+                        .cornerRadius(8)
                     }
-                    .pickerStyle(MenuPickerStyle())
-                    .accentColor(AppTheme.Colors.electricCyan)
                 }
                 .padding(.horizontal)
 
@@ -70,10 +81,9 @@ struct StatsView: View {
                     // Monthly View
                     VStack(spacing: 16) {
                         Toggle(isOn: $showFullYear) {
-                            Text(showFullYear ? "SHOWING_FULL_YEAR" : "SHOWING_UP_TO_CURRENT")
-                                .font(AppTheme.Fonts.caption(11))
-                                .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.8))
-                                .tracking(1)
+                            Text(showFullYear ? "Showing Full Year" : "Year to Date")
+                                .font(AppTheme.Fonts.caption(12))
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                         }
                         .tint(AppTheme.Colors.electricCyan)
                         .padding(.horizontal)
@@ -97,10 +107,7 @@ struct StatsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(">> STATS")
-                        .font(AppTheme.Fonts.headline(18))
-                        .foregroundColor(AppTheme.Colors.electricCyan)
-                        .tracking(2)
+                    // Title removed from center or kept simple
                 }
                 if selectedView == 0 {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -136,23 +143,18 @@ struct MonthlyStatsRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(stats.monthName.uppercased())
+                Text(stats.monthName)
                     .font(AppTheme.Fonts.headline(16))
-                    .tracking(1)
+                    .foregroundColor(AppTheme.Colors.primaryText)
 
                 if isManualEntry {
-                    Text("[MANUAL]")
-                        .font(AppTheme.Fonts.caption(9))
-                        .foregroundColor(AppTheme.Colors.electricCyan)
-                        .tracking(1)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(AppTheme.Colors.electricCyan.opacity(0.15))
+                    Text("Manual")
+                        .font(AppTheme.Fonts.caption(10))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(AppTheme.Colors.electricCyan)
                         .cornerRadius(4)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .stroke(AppTheme.Colors.electricCyan, lineWidth: 1)
-                        )
                 }
 
                 Spacer()
@@ -307,10 +309,9 @@ struct YearlyStatsView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Summary Cards
                 VStack(spacing: 16) {
-                    Text(">> YEARLY_SUMMARY")
-                        .font(AppTheme.Fonts.caption(11))
-                        .foregroundColor(AppTheme.Colors.electricCyan)
-                        .tracking(2)
+                    Text("Yearly Summary")
+                        .font(AppTheme.Fonts.headline(20))
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal)
                     
@@ -361,10 +362,9 @@ struct YearlyStatsView: View {
 
                 // Performance Metrics
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(">> PERFORMANCE_METRICS")
-                        .font(AppTheme.Fonts.caption(11))
-                        .foregroundColor(AppTheme.Colors.electricCyan)
-                        .tracking(2)
+                    Text("Performance Metrics")
+                        .font(AppTheme.Fonts.headline(18))
+                        .foregroundColor(AppTheme.Colors.primaryText)
                         .padding(.horizontal)
 
                     VStack(spacing: 12) {
@@ -424,8 +424,10 @@ struct YearlyStatsView: View {
                             }
                         }
                     }
-                    .padding(16)
-                    .techCard(glowColor: AppTheme.Colors.vibrantPurple.opacity(0.5))
+                    .padding(20)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(24)
+                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5)
                     .padding(.horizontal)
                 }
 
@@ -452,17 +454,18 @@ struct StatCard: View {
                 Spacer()
             }
 
-            Text(title.uppercased())
-                .font(AppTheme.Fonts.caption(9))
-                .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-                .tracking(1)
+            Text(title)
+                .font(AppTheme.Fonts.caption(11))
+                .foregroundColor(AppTheme.Colors.secondaryText)
 
             Text(value)
-                .font(AppTheme.Fonts.number(16))
+                .font(AppTheme.Fonts.number(18))
                 .foregroundColor(color)
         }
         .padding(16)
-        .techCard(glowColor: color.opacity(0.5))
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
 }
 

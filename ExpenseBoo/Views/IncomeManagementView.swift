@@ -59,45 +59,43 @@ struct IncomeRowView: View {
     @State private var showingEditIncome = false
     
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 16) {
+            // Icon
+            Circle()
+                .fill(AppTheme.Colors.income.opacity(0.1))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(AppTheme.Colors.income)
+                )
+            
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(dataManager.currencySymbol)\(income.amount, specifier: "%.2f")")
-                    .font(AppTheme.Fonts.number(16))
-                    .foregroundColor(AppTheme.Colors.income)
+                Text(income.isMonthly ? "Monthly Income" : "One-Time Income")
+                    .font(AppTheme.Fonts.body(16))
+                    .foregroundColor(AppTheme.Colors.primaryText)
                 
-                HStack {
-                    Text(income.date, style: .date)
-                        .font(AppTheme.Fonts.caption(10))
-                        .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-                    
-                    if income.isMonthly {
-                        Text("• MONTHLY")
-                            .font(AppTheme.Fonts.caption(10))
-                            .foregroundColor(AppTheme.Colors.electricCyan)
-                            .tracking(0.5)
-                    } else {
-                        Text("• ONE-TIME")
-                            .font(AppTheme.Fonts.caption(10))
-                            .foregroundColor(AppTheme.Colors.techOrange)
-                            .tracking(0.5)
-                    }
-                }
+                Text(income.date, style: .date)
+                    .font(AppTheme.Fonts.caption(12))
+                    .foregroundColor(AppTheme.Colors.secondaryText)
             }
             
             Spacer()
             
-            Button("EDIT") {
-                showingEditIncome = true
-            }
-            .font(AppTheme.Fonts.caption(10))
-            .foregroundColor(AppTheme.Colors.income)
-            .tracking(1)
+            Text("+\(dataManager.currencySymbol)\(income.amount, specifier: "%.2f")")
+                .font(AppTheme.Fonts.number(16))
+                .foregroundColor(AppTheme.Colors.primaryText)
         }
         .padding(.vertical, 8)
-        .padding(.horizontal, 4)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showingEditIncome = true
+        }
         .sheet(isPresented: $showingEditIncome) {
             EditIncomeView(income: income)
         }
+        .listRowBackground(Color.clear)
+        .listRowSeparatorTint(AppTheme.Colors.secondaryText.opacity(0.2))
     }
 }
 
