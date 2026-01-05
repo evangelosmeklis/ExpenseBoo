@@ -79,24 +79,38 @@ struct StatsView: View {
 
                 if selectedView == 0 {
                     // Monthly View
-                    VStack(spacing: 16) {
-                        Toggle(isOn: $showFullYear) {
-                            Text(showFullYear ? "Showing Full Year" : "Year to Date")
-                                .font(AppTheme.Fonts.caption(12))
-                                .foregroundColor(AppTheme.Colors.secondaryText)
-                        }
-                        .tint(AppTheme.Colors.electricCyan)
-                        .padding(.horizontal)
-                    }
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            // Toggle Header
+                            HStack {
+                                Text(showFullYear ? "Showing Full Year" : "Year to Date")
+                                    .font(AppTheme.Fonts.caption(12))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                    .tracking(1)
+                                Spacer()
+                                Toggle("", isOn: $showFullYear)
+                                    .labelsHidden()
+                                    .tint(AppTheme.Colors.electricCyan)
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.top, 10)
 
-                    // Stats List
-                    List {
-                        ForEach(filteredStats) { monthStats in
-                            MonthlyStatsRowView(stats: monthStats, year: selectedYear)
+                            // Stats Grid
+                            if filteredStats.isEmpty {
+                                Text("No data available for this year")
+                                    .font(AppTheme.Fonts.body())
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                    .padding(.top, 40)
+                            } else {
+                                LazyVStack(spacing: 16) {
+                                    ForEach(filteredStats) { monthStats in
+                                        MonthlyStatsRowView(stats: monthStats, year: selectedYear)
+                                    }
+                                }
+                                .padding(.bottom, 20)
+                            }
                         }
                     }
-                    .scrollContentBackground(.hidden)
-                    .background(AppTheme.Colors.primaryBackground)
                 } else {
                     // Yearly Summary View
                     YearlyStatsView(year: selectedYear)
@@ -141,154 +155,145 @@ struct MonthlyStatsRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(stats.monthName)
-                    .font(AppTheme.Fonts.headline(16))
-                    .foregroundColor(AppTheme.Colors.primaryText)
-
-                if isManualEntry {
-                    Text("Manual")
-                        .font(AppTheme.Fonts.caption(10))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(AppTheme.Colors.electricCyan)
-                        .cornerRadius(4)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    HStack(spacing: 4) {
-                        Text("Balance")
+        VStack(spacing: 0) {
+            // Header: Month Name & Balance
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(stats.monthName.uppercased())
+                        .font(AppTheme.Fonts.headline(14))
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .tracking(1)
+                    
+                    if isManualEntry {
+                        Text("MANUAL ENTRY")
                             .font(AppTheme.Fonts.caption(10))
-                            .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
-                            .tracking(1)
-                        if hasNoData || isManualEntry {
-                            Image(systemName: "pencil.circle")
-                                .font(AppTheme.Fonts.caption(10))
-                                .foregroundColor(AppTheme.Colors.electricCyan)
-                        }
+                            .foregroundColor(AppTheme.Colors.electricCyan)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(AppTheme.Colors.electricCyan.opacity(0.1))
+                            .cornerRadius(4)
                     }
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("BALANCE")
+                        .font(AppTheme.Fonts.caption(10))
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .tracking(1)
+                    
                     Text("\(dataManager.currencySymbol)\(stats.profitLoss, specifier: "%.2f")")
-                        .font(AppTheme.Fonts.number(16))
+                        .font(AppTheme.Fonts.number(20))
                         .foregroundColor(stats.profitLoss >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss)
                 }
             }
-
+            .padding(.bottom, 16)
+            
+            // Content
             if !isManualEntry {
-                Divider()
-                    .background(AppTheme.Colors.electricCyan.opacity(0.3))
-
-                HStack {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Label {
-                            Text("\(dataManager.currencySymbol)\(stats.income, specifier: "%.2f")")
-                                .font(AppTheme.Fonts.number(13))
-                                .foregroundColor(AppTheme.Colors.income)
-                        } icon: {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(AppTheme.Colors.income)
-                                .font(.system(size: 12))
+                HStack(spacing: 20) {
+                    // Income
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            Circle().fill(AppTheme.Colors.income).frame(width: 6, height: 6)
+                            Text("Income")
+                                .font(AppTheme.Fonts.caption(11))
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                         }
-
-                        Label {
-                            Text("\(dataManager.currencySymbol)\(stats.expenses, specifier: "%.2f")")
-                                .font(AppTheme.Fonts.number(13))
-                                .foregroundColor(AppTheme.Colors.expense)
-                        } icon: {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundColor(AppTheme.Colors.expense)
-                                .font(.system(size: 12))
+                        Text("\(dataManager.currencySymbol)\(stats.income, specifier: "%.0f")")
+                            .font(AppTheme.Fonts.number(14))
+                            .foregroundColor(AppTheme.Colors.primaryText)
+                    }
+                    
+                    // Expenses
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 4) {
+                            Circle().fill(AppTheme.Colors.expense).frame(width: 6, height: 6)
+                            Text("Expenses")
+                                .font(AppTheme.Fonts.caption(11))
+                                .foregroundColor(AppTheme.Colors.secondaryText)
                         }
-
-                        if stats.investments > 0 {
-                            Label {
-                                Text("\(dataManager.currencySymbol)\(stats.investments, specifier: "%.2f")")
-                                    .font(AppTheme.Fonts.number(13))
-                                    .foregroundColor(AppTheme.Colors.investment)
-                            } icon: {
-                                Image(systemName: "chart.line.uptrend.xyaxis")
-                                    .foregroundColor(AppTheme.Colors.investment)
-                                    .font(.system(size: 12))
+                        Text("\(dataManager.currencySymbol)\(stats.expenses, specifier: "%.0f")")
+                            .font(AppTheme.Fonts.number(14))
+                            .foregroundColor(AppTheme.Colors.primaryText)
+                    }
+                    
+                    // Investments (if any)
+                    if stats.investments > 0 {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 4) {
+                                Circle().fill(AppTheme.Colors.investment).frame(width: 6, height: 6)
+                                Text("Invest")
+                                    .font(AppTheme.Fonts.caption(11))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
                             }
+                            Text("\(dataManager.currencySymbol)\(stats.investments, specifier: "%.0f")")
+                                .font(AppTheme.Fonts.number(14))
+                                .foregroundColor(AppTheme.Colors.primaryText)
                         }
                     }
-
+                    
                     Spacer()
                 }
             } else {
-                // Show breakdown for manual entries if they have income/expenses
-                if stats.income > 0 || stats.expenses > 0 || stats.investments > 0 {
-                    Divider()
-
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            if stats.income > 0 {
-                                Label {
-                                    Text("\(dataManager.currencySymbol)\(stats.income, specifier: "%.2f")")
-                                        .foregroundColor(.green)
-                                } icon: {
-                                    Image(systemName: "plus.circle.fill")
-                                        .foregroundColor(.green)
-                                }
-                                .font(.subheadline)
-                            }
-
-                            if stats.expenses > 0 {
-                                Label {
-                                    Text("\(dataManager.currencySymbol)\(stats.expenses, specifier: "%.2f")")
-                                        .foregroundColor(.red)
-                                } icon: {
-                                    Image(systemName: "minus.circle.fill")
-                                        .foregroundColor(.red)
-                                }
-                                .font(.subheadline)
-                            }
-
-                            if stats.investments > 0 {
-                                Label {
-                                    Text("\(dataManager.currencySymbol)\(stats.investments, specifier: "%.2f")")
-                                        .foregroundColor(.purple)
-                                } icon: {
-                                    Image(systemName: "chart.line.uptrend.xyaxis")
-                                        .foregroundColor(.purple)
-                                }
-                                .font(.subheadline)
-                            }
-
-                            if stats.income > 0 || stats.expenses > 0 {
-                                Text("Manual Breakdown")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            } else if stats.investments > 0 {
-                                Text("Manual Investment")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
+                 if stats.income > 0 || stats.expenses > 0 || stats.investments > 0 {
+                     HStack(spacing: 20) {
+                        if stats.income > 0 {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Income")
+                                    .font(AppTheme.Fonts.caption(11))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                Text("\(dataManager.currencySymbol)\(stats.income, specifier: "%.0f")")
+                                    .font(AppTheme.Fonts.number(14))
+                                    .foregroundColor(.green)
                             }
                         }
-
+                         
+                        if stats.expenses > 0 {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Expense")
+                                    .font(AppTheme.Fonts.caption(11))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                Text("\(dataManager.currencySymbol)\(stats.expenses, specifier: "%.0f")")
+                                    .font(AppTheme.Fonts.number(14))
+                                    .foregroundColor(.red)
+                            }
+                        }
+                         
+                        if stats.investments > 0 {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Invest")
+                                    .font(AppTheme.Fonts.caption(11))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+                                Text("\(dataManager.currencySymbol)\(stats.investments, specifier: "%.0f")")
+                                    .font(AppTheme.Fonts.number(14))
+                                    .foregroundColor(.purple)
+                            }
+                        }
+                         
                         Spacer()
-                    }
-                }
+                     }
+                 } else {
+                     Text("Direct Balance Adjustment")
+                        .font(AppTheme.Fonts.caption(12))
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                 }
             }
         }
-        .padding(12)
+        .padding(16)
+        .background(.ultraThinMaterial)
+        .cornerRadius(20)
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .padding(.horizontal)
         .contentShape(Rectangle())
         .onTapGesture {
             showingEditManualPL = true
         }
-        .contextMenu {
-            Button(action: { showingEditManualPL = true }) {
-                Label("Add/Edit Manual Entry", systemImage: "pencil")
-            }
-        }
         .sheet(isPresented: $showingEditManualPL) {
             AddManualPLView(selectedYear: year, selectedMonth: stats.month)
         }
-        .listRowBackground(AppTheme.Colors.cardBackground)
-        .listRowSeparatorTint(AppTheme.Colors.electricCyan.opacity(0.2))
     }
 
     private var hasNoData: Bool {
