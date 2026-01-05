@@ -161,7 +161,7 @@ struct MonthlyStatsRowView: View {
 
                 VStack(alignment: .trailing, spacing: 2) {
                     HStack(spacing: 4) {
-                        Text("P/L")
+                        Text("Balance")
                             .font(AppTheme.Fonts.caption(10))
                             .foregroundColor(AppTheme.Colors.electricCyan.opacity(0.7))
                             .tracking(1)
@@ -303,6 +303,10 @@ struct YearlyStatsView: View {
     var yearlyStats: YearlyStats {
         dataManager.getYearlyStats(for: year)
     }
+    
+    var monthlyStats: [MonthlyStats] {
+        dataManager.getMonthlyStats(for: year)
+    }
 
     var body: some View {
         ScrollView {
@@ -316,40 +320,40 @@ struct YearlyStatsView: View {
                         .padding(.horizontal)
                     
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 16) {
-                    StatCard(
-                        title: "Total Income",
-                        value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalIncome),
-                        color: AppTheme.Colors.income,
-                        icon: "plus.circle.fill"
-                    )
-
-                    StatCard(
-                        title: "Total Expenses",
-                        value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalExpenses),
-                        color: AppTheme.Colors.expense,
-                        icon: "minus.circle.fill"
-                    )
-
-                    StatCard(
-                        title: "Total Investments",
-                        value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalInvestments),
-                        color: AppTheme.Colors.investment,
-                        icon: "chart.line.uptrend.xyaxis"
-                    )
+                        StatCard(
+                            title: "Total Income",
+                            value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalIncome),
+                            color: AppTheme.Colors.income,
+                            icon: "plus.circle.fill"
+                        )
 
                         StatCard(
-                            title: "Net P/L",
+                            title: "Total Expenses",
+                            value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalExpenses),
+                            color: AppTheme.Colors.expense,
+                            icon: "minus.circle.fill"
+                        )
+
+                        StatCard(
+                            title: "Total Investments",
+                            value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalInvestments),
+                            color: AppTheme.Colors.investment,
+                            icon: "chart.line.uptrend.xyaxis"
+                        )
+
+                        StatCard(
+                            title: "Net Balance",
                             value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalProfitLoss),
                             color: yearlyStats.totalProfitLoss >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss,
                             icon: yearlyStats.totalProfitLoss >= 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill"
                         )
                     }
 
-                    // Centered card for P/L without investments
+                    // Centered card for balance without investments
                     HStack {
                         Spacer()
                         StatCard(
-                            title: "P/L without investments",
+                            title: "Balance without investments",
                             value: String(format: "\(dataManager.currencySymbol)%.2f", yearlyStats.totalProfitLossWithoutInvestments),
                             color: yearlyStats.totalProfitLossWithoutInvestments >= 0 ? AppTheme.Colors.profit : AppTheme.Colors.loss,
                             icon: yearlyStats.totalProfitLossWithoutInvestments >= 0 ? "dollarsign.circle.fill" : "dollarsign.circle"
@@ -359,6 +363,15 @@ struct YearlyStatsView: View {
                     }
                 }
                 .padding(.horizontal)
+                
+                // Charts Section
+                if !monthlyStats.isEmpty {
+                    VStack(spacing: 24) {
+                        MonthlyPerformanceChart(stats: monthlyStats)
+                        ProfitTrendChart(stats: monthlyStats)
+                    }
+                    .padding(.horizontal)
+                }
 
                 // Performance Metrics
                 VStack(alignment: .leading, spacing: 12) {
@@ -369,7 +382,7 @@ struct YearlyStatsView: View {
 
                     VStack(spacing: 12) {
                         HStack {
-                            Text("Avg Monthly P/L:")
+                            Text("Avg Monthly Balance:")
                                 .font(AppTheme.Fonts.body(13))
                                 .tracking(0.5)
                             Spacer()
@@ -379,7 +392,7 @@ struct YearlyStatsView: View {
                         }
 
                         HStack {
-                            Text("Avg P/L w/o invest:")
+                            Text("Avg Balance w/o invest:")
                                 .font(AppTheme.Fonts.body(13))
                                 .tracking(0.5)
                             Spacer()
@@ -432,6 +445,7 @@ struct YearlyStatsView: View {
                 }
 
                 Spacer()
+                    .frame(height: 40)
             }
             .padding(.top)
         }
@@ -536,7 +550,7 @@ struct AddManualPLView: View {
                 .padding()
 
                 Form {
-                    Section(header: Text("Manual P/L & Investment Entry")) {
+                    Section(header: Text("Manual Balance & Investment Entry")) {
                         if selectedMonth == nil {
                             Picker("Month", selection: $month) {
                                 Text("January").tag(1)
@@ -569,15 +583,15 @@ struct AddManualPLView: View {
                         }
 
                         Picker("Entry Mode", selection: $entryMode) {
-                            Text("Direct P/L").tag(0)
+                            Text("Direct Balance").tag(0)
                             Text("Income & Expenses").tag(1)
                         }
                         .pickerStyle(SegmentedPickerStyle())
 
                         if entryMode == 0 {
-                            // Direct P/L Entry
+                            // Direct Balance Entry
                             VStack(alignment: .leading, spacing: 8) {
-                                TextField("P/L Amount", text: $profitLoss)
+                                TextField("Balance Amount", text: $profitLoss)
                                     .keyboardType(.numbersAndPunctuation)
 
                                 HStack(spacing: 12) {
@@ -609,7 +623,7 @@ struct AddManualPLView: View {
                                     .keyboardType(.numbersAndPunctuation)
 
                                 HStack {
-                                    Text("P/L: ")
+                                    Text("Balance: ")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                     let incomeVal = Double(income) ?? 0

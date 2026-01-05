@@ -190,7 +190,7 @@ struct ExpensesView: View {
                             .overlay(AppTheme.Colors.secondaryText.opacity(0.1))
 
                         HStack {
-                            Text("Net P/L (w/o invest)")
+                            Text("Net Balance (w/o invest)")
                                 .font(AppTheme.Fonts.caption(12))
                                 .foregroundColor(AppTheme.Colors.secondaryText)
                             Spacer()
@@ -262,7 +262,7 @@ struct ExpensesView: View {
                 }
             }
             .background(AppTheme.Colors.primaryBackground.ignoresSafeArea())
-            .navigationTitle("P/L")
+            .navigationTitle("Transactions")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

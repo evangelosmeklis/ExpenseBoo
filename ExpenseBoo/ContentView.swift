@@ -24,7 +24,7 @@ struct ContentView: View {
             ExpensesView()
                 .tabItem {
                     Image(systemName: "list.bullet")
-                    Text("P/L")
+                    Text("Transactions")
                         .font(AppTheme.Fonts.caption())
                 }
                 .tag(1)
