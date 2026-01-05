@@ -37,13 +37,21 @@ struct ContentView: View {
                 }
                 .tag(2)
 
+            SubscriptionsView()
+                .tabItem {
+                    Image(systemName: "creditcard.fill")
+                    Text("Subscriptions")
+                        .font(AppTheme.Fonts.caption())
+                }
+                .tag(3)
+
             SettingsView()
                 .tabItem {
                     Image(systemName: "gear")
                     Text("Settings")
                         .font(AppTheme.Fonts.caption())
                 }
-                .tag(3)
+                .tag(4)
         }
         .tint(AppTheme.Colors.electricCyan)
     }

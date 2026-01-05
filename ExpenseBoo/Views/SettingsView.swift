@@ -5,7 +5,7 @@ struct SettingsView: View {
     @State private var tempSettings: Settings
     @State private var showingIncomeManagement = false
     @State private var showingInvestmentManagement = false
-    @State private var showingSubscriptionManagement = false
+
     
     init() {
         _tempSettings = State(initialValue: Settings())
@@ -38,18 +38,6 @@ struct SettingsView: View {
                     .listRowBackground(AppTheme.Colors.cardBackground)
 
                     Text("\(dataManager.investments.count) entries")
-                        .foregroundColor(AppTheme.Colors.secondaryText)
-                        .font(AppTheme.Fonts.caption())
-                        .listRowBackground(AppTheme.Colors.cardBackground)
-                    
-                    Button("Manage Subscriptions") {
-                        showingSubscriptionManagement = true
-                    }
-                    .font(AppTheme.Fonts.body())
-                    .foregroundColor(AppTheme.Colors.primaryText)
-                    .listRowBackground(AppTheme.Colors.cardBackground)
-                    
-                    Text("\(dataManager.subscriptions.count) subscriptions")
                         .foregroundColor(AppTheme.Colors.secondaryText)
                         .font(AppTheme.Fonts.caption())
                         .listRowBackground(AppTheme.Colors.cardBackground)
@@ -93,33 +81,6 @@ struct SettingsView: View {
                             .listRowBackground(AppTheme.Colors.cardBackground)
                     }
                 }
-                
-                Section(header: Text("Data Stats")
-                    .font(AppTheme.Fonts.caption(13))
-                    .foregroundColor(AppTheme.Colors.secondaryText)) {
-                    HStack {
-                        Text("Total Expenses")
-                            .font(AppTheme.Fonts.body())
-                            .foregroundColor(AppTheme.Colors.primaryText)
-                        Spacer()
-                        Text("\(dataManager.expenses.count)")
-                            .font(AppTheme.Fonts.number())
-                            .foregroundColor(AppTheme.Colors.secondaryText)
-                    }
-                    .listRowBackground(AppTheme.Colors.cardBackground)
-
-                    HStack {
-                        Text("Total Income Entries")
-                            .font(AppTheme.Fonts.body())
-                            .foregroundColor(AppTheme.Colors.primaryText)
-                        Spacer()
-                        Text("\(dataManager.incomes.count)")
-                            .font(AppTheme.Fonts.number())
-                            .foregroundColor(AppTheme.Colors.secondaryText)
-                    }
-                    .listRowBackground(AppTheme.Colors.cardBackground)
-                    
-                }
             }
             .scrollContentBackground(.hidden)
             .background(AppTheme.Colors.primaryBackground)
@@ -144,9 +105,6 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingInvestmentManagement) {
                 InvestmentManagementView()
-            }
-            .sheet(isPresented: $showingSubscriptionManagement) {
-                SubscriptionManagementView()
             }
         }
     }
