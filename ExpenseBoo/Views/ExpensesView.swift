@@ -7,15 +7,25 @@ struct ExpensesView: View {
     @State private var startDate = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
     @State private var endDate = Date()
     @State private var showingDatePicker = false
+    @State private var expenseSortOption = 0
+    @State private var showingSettings = false
     
     var filteredExpenses: [Expense] {
+        let expenses: [Expense]
         switch selectedPeriod {
         case 0:
-            return dataManager.getCurrentMonthExpenses().sorted { $0.date > $1.date }
+            expenses = dataManager.getCurrentMonthExpenses()
         case 1:
-            return getExpensesInDateRange().sorted { $0.date > $1.date }
+            expenses = getExpensesInDateRange()
         default:
-            return []
+            expenses = []
+        }
+
+        switch expenseSortOption {
+        case 1:
+            return expenses.sorted { $0.amount > $1.amount }
+        default:
+            return expenses.sorted { $0.date > $1.date }
         }
     }
 
@@ -144,6 +154,19 @@ struct ExpensesView: View {
                         }
                         .padding(.horizontal)
                     }
+
+                    HStack {
+                        Spacer()
+                        Menu {
+                            Text("Sort by:")
+                            Button("Date") { expenseSortOption = 0 }
+                            Button("Amount") { expenseSortOption = 1 }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                                .foregroundColor(AppTheme.Colors.primaryText)
+                        }
+                    }
+                    .padding(.horizontal)
                     
                     // P/L Summary
                     VStack(spacing: 16) {
@@ -265,7 +288,11 @@ struct ExpensesView: View {
             .navigationTitle("Transactions")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button(action: { showingSettings = true }) {
+                        Image(systemName: "person.circle.fill")
+                            .foregroundColor(AppTheme.Colors.secondaryText)
+                    }
                     Button(action: { showingAddExpense = true }) {
                         Image(systemName: "plus.circle.fill")
                             .symbolRenderingMode(.palette)
@@ -278,6 +305,9 @@ struct ExpensesView: View {
             }
             .sheet(isPresented: $showingDatePicker) {
                 DateRangePickerView(startDate: $startDate, endDate: $endDate)
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
         }
     }

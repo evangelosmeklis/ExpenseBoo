@@ -3,11 +3,21 @@ import SwiftUI
 struct SubscriptionsView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var showingAddSubscription = false
-    
+    @State private var isGridView = true
+    @State private var isSelectionMode = false
+    @State private var selectedSubscriptions: Set<UUID> = []
+    @State private var showingSettings = false
+
     var totalMonthlyCost: Double {
         dataManager.subscriptions.filter { $0.isActive }.reduce(0) { $0 + $1.amount }
     }
-    
+
+    var selectedMonthlyCost: Double {
+        dataManager.subscriptions
+            .filter { selectedSubscriptions.contains($0.id) }
+            .reduce(0) { $0 + $1.amount }
+    }
+
     var sortedSubscriptions: [Subscription] {
         dataManager.subscriptions.sorted { $0.amount > $1.amount }
     }
@@ -16,50 +26,141 @@ struct SubscriptionsView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
-                    // Header Stats
-                    VStack(spacing: 8) {
-                        Text("Total Monthly")
-                            .font(AppTheme.Fonts.caption(14))
-                            .foregroundColor(AppTheme.Colors.secondaryText)
-                        
-                        Text("\(dataManager.currencySymbol)\(totalMonthlyCost, specifier: "%.2f")")
-                            .font(AppTheme.Fonts.title(36))
-                            .foregroundColor(AppTheme.Colors.primaryText)
-                            .shadow(color: AppTheme.Colors.electricCyan.opacity(0.3), radius: 10, x: 0, y: 5)
-                        
-                        Text("\(dataManager.subscriptions.filter { $0.isActive }.count) active subscriptions")
-                             .font(AppTheme.Fonts.caption(12))
-                             .padding(.horizontal, 10)
-                             .padding(.vertical, 4)
-                             .background(AppTheme.Colors.secondaryBackground)
-                             .cornerRadius(10)
-                             .foregroundColor(AppTheme.Colors.secondaryText)
-                    }
-                    .padding(.top)
-                    
-                    // Visualization: Subscription Map
-                    if !dataManager.subscriptions.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Expense Map")
-                                .font(AppTheme.Fonts.headline(18))
-                                .padding(.horizontal)
-                            
-                            SubscriptionTreeMap(
-                                subscriptions: sortedSubscriptions,
-                                totalAmount: totalMonthlyCost == 0 ? 1 : totalMonthlyCost,
-                                dataManager: dataManager
-                            )
-                            .frame(height: 220)
-                            .padding(.horizontal)
+                    HStack {
+                        Spacer()
+                        Button(action: { showingSettings = true }) {
+                            Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .frame(width: 32, height: 32)
+                                .foregroundColor(AppTheme.Colors.secondaryText.opacity(0.6))
                         }
                     }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+
+                    // Header Stats
+                    VStack(spacing: 12) {
+                        if isSelectionMode && !selectedSubscriptions.isEmpty {
+                            // Selection mode - show selected vs total
+                            HStack(alignment: .center, spacing: 20) {
+                                // Total
+                                VStack(spacing: 4) {
+                                    Text("Total")
+                                        .font(AppTheme.Fonts.caption(12))
+                                        .foregroundColor(AppTheme.Colors.secondaryText)
+                                    Text("\(dataManager.currencySymbol)\(totalMonthlyCost, specifier: "%.2f")")
+                                        .font(AppTheme.Fonts.title(24))
+                                        .foregroundColor(AppTheme.Colors.primaryText)
+                                }
+
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 16))
+                                    .foregroundColor(AppTheme.Colors.secondaryText)
+
+                                // Selected (Potential Savings)
+                                VStack(spacing: 4) {
+                                    Text("Could Save")
+                                        .font(AppTheme.Fonts.caption(12))
+                                        .foregroundColor(AppTheme.Colors.loss)
+                                    Text("\(dataManager.currencySymbol)\(selectedMonthlyCost, specifier: "%.2f")")
+                                        .font(AppTheme.Fonts.title(24))
+                                        .foregroundColor(AppTheme.Colors.loss)
+                                        .fontWeight(.bold)
+                                }
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 20)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(16)
+                            .shadow(color: AppTheme.Colors.loss.opacity(0.2), radius: 10, x: 0, y: 5)
+
+                            Text("\(selectedSubscriptions.count) selected")
+                                .font(AppTheme.Fonts.caption(12))
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(AppTheme.Colors.loss.opacity(0.2))
+                                .cornerRadius(10)
+                                .foregroundColor(AppTheme.Colors.loss)
+                        } else {
+                            // Normal mode
+                            Text("Total Monthly")
+                                .font(AppTheme.Fonts.caption(14))
+                                .foregroundColor(AppTheme.Colors.secondaryText)
+
+                            Text("\(dataManager.currencySymbol)\(totalMonthlyCost, specifier: "%.2f")")
+                                .font(AppTheme.Fonts.title(36))
+                                .foregroundColor(AppTheme.Colors.primaryText)
+                                .shadow(color: AppTheme.Colors.electricCyan.opacity(0.3), radius: 10, x: 0, y: 5)
+
+                            Text("\(dataManager.subscriptions.filter { $0.isActive }.count) active subscriptions")
+                                 .font(AppTheme.Fonts.caption(12))
+                                 .padding(.horizontal, 10)
+                                 .padding(.vertical, 4)
+                                 .background(AppTheme.Colors.secondaryBackground)
+                                 .cornerRadius(10)
+                                 .foregroundColor(AppTheme.Colors.secondaryText)
+                        }
+                    }
+                    .padding(.top)
+                    .animation(.easeInOut(duration: 0.3), value: isSelectionMode)
+                    .animation(.easeInOut(duration: 0.3), value: selectedSubscriptions.count)
                     
-                    // List
-                    VStack(alignment: .leading, spacing: 12) {
+                    // Unified View Section
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Header with Switcher and Add Button
                         HStack {
-                            Text("Your Subscriptions")
+                            Text("Overview")
                                 .font(AppTheme.Fonts.headline(18))
+
                             Spacer()
+
+                            // Selection Mode Button
+                            Button(action: {
+                                isSelectionMode.toggle()
+                                if !isSelectionMode {
+                                    selectedSubscriptions.removeAll()
+                                }
+                            }) {
+                                HStack(spacing: 4) {
+                                    Image(systemName: isSelectionMode ? "checkmark.circle.fill" : "checkmark.circle")
+                                        .font(.system(size: 14))
+                                    Text(isSelectionMode ? "Done" : "Select")
+                                        .font(AppTheme.Fonts.caption(12))
+                                }
+                                .foregroundColor(isSelectionMode ? AppTheme.Colors.electricCyan : AppTheme.Colors.secondaryText)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelectionMode ? AppTheme.Colors.electricCyan.opacity(0.2) : AppTheme.Colors.secondaryBackground)
+                                .cornerRadius(8)
+                            }
+                            .padding(.trailing, 8)
+
+                            // View Switcher
+                            HStack(spacing: 0) {
+                                Button(action: { isGridView = true }) {
+                                    Image(systemName: "square.grid.2x2.fill")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(isGridView ? .white : AppTheme.Colors.secondaryText)
+                                        .frame(width: 36, height: 32)
+                                        .background(isGridView ? AppTheme.Colors.electricCyan : Color.clear)
+                                        .cornerRadius(8)
+                                }
+
+                                Button(action: { isGridView = false }) {
+                                    Image(systemName: "list.bullet")
+                                        .font(.system(size: 14))
+                                        .foregroundColor(!isGridView ? .white : AppTheme.Colors.secondaryText)
+                                        .frame(width: 36, height: 32)
+                                        .background(!isGridView ? AppTheme.Colors.electricCyan : Color.clear)
+                                        .cornerRadius(8)
+                                }
+                            }
+                            .padding(2)
+                            .background(AppTheme.Colors.secondaryBackground)
+                            .cornerRadius(10)
+                            .padding(.trailing, 8)
+
+                            // Add Button
                             Button(action: { showingAddSubscription = true }) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.title2)
@@ -71,13 +172,35 @@ struct SubscriptionsView: View {
                         if dataManager.subscriptions.isEmpty {
                             EmptyStateView()
                         } else {
-                            LazyVStack(spacing: 12) {
-                                ForEach(dataManager.subscriptions) { subscription in
-                                    SubscriptionCardRow(subscription: subscription)
+                            if isGridView {
+                                SubscriptionGridView(
+                                    subscriptions: sortedSubscriptions,
+                                    dataManager: dataManager,
+                                    isSelectionMode: isSelectionMode,
+                                    selectedSubscriptions: $selectedSubscriptions
+                                )
+                            } else {
+                                LazyVStack(spacing: 12) {
+                                    ForEach(sortedSubscriptions) { subscription in
+                                        SubscriptionCardRow(
+                                            subscription: subscription,
+                                            isSelectionMode: isSelectionMode,
+                                            isSelected: selectedSubscriptions.contains(subscription.id)
+                                        )
+                                        .onTapGesture {
+                                            if isSelectionMode {
+                                                if selectedSubscriptions.contains(subscription.id) {
+                                                    selectedSubscriptions.remove(subscription.id)
+                                                } else {
+                                                    selectedSubscriptions.insert(subscription.id)
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
+                                .padding(.horizontal)
+                                .padding(.bottom, 20)
                             }
-                            .padding(.horizontal)
-                            .padding(.bottom, 20)
                         }
                     }
                 }
@@ -88,17 +211,21 @@ struct SubscriptionsView: View {
             .sheet(isPresented: $showingAddSubscription) {
                 AddSubscriptionView()
             }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+            }
         }
     }
 }
 
 // MARK: - Visualization
-struct SubscriptionTreeMap: View {
+struct SubscriptionGridView: View {
     let subscriptions: [Subscription]
-    let totalAmount: Double
     let dataManager: DataManager
+    let isSelectionMode: Bool
+    @Binding var selectedSubscriptions: Set<UUID>
 
-    // Vibrant color palette for subscriptions
+    // Vibrant color palette
     let colorPalette: [Color] = [
         Color(red: 0.3, green: 0.7, blue: 0.9),   // Sky Blue
         Color(red: 0.9, green: 0.5, blue: 0.3),   // Coral
@@ -112,76 +239,116 @@ struct SubscriptionTreeMap: View {
         Color(red: 0.6, green: 0.8, blue: 0.4)    // Lime
     ]
 
+    let columns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(alignment: .top, spacing: 8) {
-                ForEach(Array(subscriptions.enumerated()), id: \.element.id) { index, subscription in
-                    SubscriptionBox(
-                        subscription: subscription,
-                        color: colorPalette[index % colorPalette.count],
-                        dataManager: dataManager
-                    )
+        LazyVGrid(columns: columns, spacing: 16) {
+            ForEach(Array(subscriptions.enumerated()), id: \.element.id) { index, subscription in
+                SubscriptionGridCard(
+                    subscription: subscription,
+                    color: colorPalette[index % colorPalette.count],
+                    dataManager: dataManager,
+                    isSelectionMode: isSelectionMode,
+                    isSelected: selectedSubscriptions.contains(subscription.id)
+                )
+                .onTapGesture {
+                    if isSelectionMode {
+                        if selectedSubscriptions.contains(subscription.id) {
+                            selectedSubscriptions.remove(subscription.id)
+                        } else {
+                            selectedSubscriptions.insert(subscription.id)
+                        }
+                    }
                 }
             }
-            .padding(.horizontal, 4)
         }
-        .frame(height: 220)
+        .padding(.horizontal)
     }
 }
 
-struct SubscriptionBox: View {
+struct SubscriptionGridCard: View {
     let subscription: Subscription
     let color: Color
     let dataManager: DataManager
+    let isSelectionMode: Bool
+    let isSelected: Bool
 
-    // Calculate width based on amount (min 80, max 200)
-    private var boxWidth: CGFloat {
-        let percentage = subscription.amount / max(dataManager.subscriptions.map { $0.amount }.max() ?? 1, 1)
-        return 80 + (percentage * 120) // Range: 80-200
+    var category: Category? {
+        dataManager.getCategoryById(subscription.categoryId)
     }
 
     var body: some View {
-        VStack(spacing: 8) {
-            // Amount display
-            VStack(spacing: 4) {
-                Text("\(dataManager.currencySymbol)\(subscription.amount, specifier: "%.2f")")
-                    .font(AppTheme.Fonts.number(22))
-                    .foregroundColor(.white)
-                    .fontWeight(.bold)
+        VStack(alignment: .leading, spacing: 12) {
+            // Header: Icon & Category Indicator
+            HStack {
+                ZStack {
+                    Circle()
+                        .fill(.white.opacity(0.2))
+                        .frame(width: 32, height: 32)
 
-                Text("/mo")
-                    .font(AppTheme.Fonts.caption(10))
-                    .foregroundColor(.white.opacity(0.8))
+                    Image(systemName: "creditcard.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                }
+
+                Spacer()
+
+                // Selection indicator or status dot
+                if isSelectionMode {
+                    ZStack {
+                        Circle()
+                            .fill(isSelected ? Color.white : Color.white.opacity(0.3))
+                            .frame(width: 24, height: 24)
+
+                        if isSelected {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(color)
+                        }
+                    }
+                } else if subscription.isActive {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 6, height: 6)
+                        .shadow(color: .white.opacity(0.5), radius: 4)
+                }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 16)
-
+            
             Spacer()
-
-            // Subscription name
-            Text(subscription.name)
-                .font(AppTheme.Fonts.body(13))
+            
+            // Amount
+            Text("\(dataManager.currencySymbol)\(subscription.amount, specifier: "%.2f")")
+                .font(AppTheme.Fonts.number(24))
                 .foregroundColor(.white)
-                .lineLimit(2)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.8)
-                .padding(.horizontal, 8)
-                .padding(.bottom, 12)
+                .fontWeight(.bold)
+            
+            // Name
+            Text(subscription.name)
+                .font(AppTheme.Fonts.body(14))
+                .foregroundColor(.white.opacity(0.9))
+                .lineLimit(1)
         }
-        .frame(width: boxWidth, height: 190)
+        .padding(16)
+        .frame(height: 160)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
-                gradient: Gradient(colors: [color, color.opacity(0.8)]),
+                gradient: Gradient(colors: [color, color.opacity(0.7)]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         )
-        .cornerRadius(16)
-        .shadow(color: color.opacity(0.4), radius: 8, x: 0, y: 4)
+        .cornerRadius(20)
+        .shadow(color: color.opacity(0.3), radius: 8, x: 0, y: 4)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(isSelected ? Color.white : Color.white.opacity(0.2), lineWidth: isSelected ? 3 : 1)
         )
+        .scaleEffect(isSelected ? 0.95 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
     }
 }
 
@@ -189,20 +356,42 @@ struct SubscriptionBox: View {
 struct SubscriptionCardRow: View {
     @EnvironmentObject var dataManager: DataManager
     let subscription: Subscription
+    let isSelectionMode: Bool
+    let isSelected: Bool
     @State private var showingEdit = false
-    
+
     var category: Category? {
         dataManager.getCategoryById(subscription.categoryId)
     }
-    
+
     var body: some View {
         HStack {
+            // Selection indicator
+            if isSelectionMode {
+                ZStack {
+                    Circle()
+                        .stroke(isSelected ? AppTheme.Colors.electricCyan : AppTheme.Colors.secondaryText.opacity(0.3), lineWidth: 2)
+                        .frame(width: 24, height: 24)
+
+                    if isSelected {
+                        Circle()
+                            .fill(AppTheme.Colors.electricCyan)
+                            .frame(width: 24, height: 24)
+
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .padding(.trailing, 8)
+            }
+
             // Icon / Category
             ZStack {
                 Circle()
                     .fill(category?.color.opacity(0.2) ?? Color.gray.opacity(0.2))
                     .frame(width: 48, height: 48)
-                
+
                 Image(systemName: "creditcard.fill")
                     .foregroundColor(category?.color ?? .gray)
                     .font(.system(size: 20))
@@ -242,8 +431,14 @@ struct SubscriptionCardRow: View {
         .background(AppTheme.Colors.cardBackground)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isSelected ? AppTheme.Colors.electricCyan : Color.clear, lineWidth: 2)
+        )
         .onTapGesture {
-            showingEdit = true
+            if !isSelectionMode {
+                showingEdit = true
+            }
         }
         .sheet(isPresented: $showingEdit) {
             EditSubscriptionView(subscription: subscription)

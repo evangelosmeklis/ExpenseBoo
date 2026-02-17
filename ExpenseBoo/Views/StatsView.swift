@@ -6,6 +6,7 @@ struct StatsView: View {
     @State private var showFullYear = true
     @State private var selectedView = 0 // 0 = Monthly, 1 = Yearly Summary
     @State private var showingAddManualPL = false
+    @State private var showingSettings = false
 
     init() {
         _selectedYear = State(initialValue: Calendar.current.component(.year, from: Date()))
@@ -123,17 +124,24 @@ struct StatsView: View {
                 ToolbarItem(placement: .principal) {
                     // Title removed from center or kept simple
                 }
-                if selectedView == 0 {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    if selectedView == 0 {
                         Button(action: { showingAddManualPL = true }) {
                             Image(systemName: "plus.circle.fill")
                                 .foregroundColor(AppTheme.Colors.electricCyan)
                         }
                     }
+                    Button(action: { showingSettings = true }) {
+                        Image(systemName: "person.circle.fill")
+                            .foregroundColor(AppTheme.Colors.secondaryText)
+                    }
                 }
             }
             .sheet(isPresented: $showingAddManualPL) {
                 AddManualPLView(selectedYear: selectedYear)
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
         }
         .onAppear {

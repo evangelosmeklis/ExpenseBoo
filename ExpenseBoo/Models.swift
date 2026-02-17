@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct Expense: Identifiable, Codable {
+struct Expense: Identifiable, Codable, Equatable {
     var id: UUID
     var amount: Double
     var comment: String
@@ -58,7 +58,7 @@ extension Color: Codable {
     }
 }
 
-struct Income: Identifiable, Codable {
+struct Income: Identifiable, Codable, Equatable {
     var id: UUID
     var amount: Double
     var date: Date

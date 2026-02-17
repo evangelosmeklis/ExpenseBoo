@@ -18,13 +18,19 @@ struct ExpenseBooApp: App {
                 .environmentObject(dataManager)
                 .onAppear {
                     notificationManager.requestPermission()
-                    notificationManager.updateNotifications(dataManager: dataManager)
                     dataManager.addSubscriptionExpenses()
+                    notificationManager.updateNotifications(dataManager: dataManager)
                 }
                 .onChange(of: dataManager.settings.notificationsEnabled) { oldValue, newValue in
                     notificationManager.updateNotifications(dataManager: dataManager)
                 }
                 .onChange(of: dataManager.settings.dailyNotificationTime) { oldValue, newValue in
+                    notificationManager.updateNotifications(dataManager: dataManager)
+                }
+                .onChange(of: dataManager.expenses) { oldValue, newValue in
+                    notificationManager.updateNotifications(dataManager: dataManager)
+                }
+                .onChange(of: dataManager.incomes) { oldValue, newValue in
                     notificationManager.updateNotifications(dataManager: dataManager)
                 }
         }

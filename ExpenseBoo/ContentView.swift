@@ -44,14 +44,6 @@ struct ContentView: View {
                         .font(AppTheme.Fonts.caption())
                 }
                 .tag(3)
-
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gear")
-                    Text("Settings")
-                        .font(AppTheme.Fonts.caption())
-                }
-                .tag(4)
         }
         .tint(AppTheme.Colors.electricCyan)
     }

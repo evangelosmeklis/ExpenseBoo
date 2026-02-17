@@ -3,6 +3,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var showingAddExpense = false
+    @State private var showingSettings = false
     
     var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -51,10 +52,12 @@ struct DashboardView: View {
                             }
                             Spacer()
                             // Profile Image or Icon
-                            Image(systemName: "person.circle.fill")
-                                .resizable()
-                                .frame(width: 40, height: 40)
-                                .foregroundColor(AppTheme.Colors.secondaryText.opacity(0.5))
+                            Button(action: { showingSettings = true }) {
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(AppTheme.Colors.secondaryText.opacity(0.5))
+                            }
                         }
                         .padding(.horizontal)
                         
@@ -74,6 +77,9 @@ struct DashboardView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $showingAddExpense) {
                 AddExpenseView()
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
         }
         .environmentObject(dataManager)
