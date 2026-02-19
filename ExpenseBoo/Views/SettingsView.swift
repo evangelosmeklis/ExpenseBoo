@@ -1,10 +1,60 @@
 import SwiftUI
+import UniformTypeIdentifiers
+
+struct ShareSheetPresenter: UIViewControllerRepresentable {
+    let items: [Any]
+    @Binding var isPresented: Bool
+
+    class Coordinator: NSObject {
+        var isPresenting = false
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        UIViewController()
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        guard isPresented, !context.coordinator.isPresenting else { return }
+        context.coordinator.isPresenting = true
+
+        let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        activityVC.completionWithItemsHandler = { _, _, _, _ in
+            DispatchQueue.main.async {
+                isPresented = false
+                context.coordinator.isPresenting = false
+            }
+        }
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = uiViewController.view
+            popover.sourceRect = CGRect(
+                x: uiViewController.view.bounds.midX,
+                y: uiViewController.view.bounds.midY,
+                width: 0, height: 0
+            )
+            popover.permittedArrowDirections = []
+        }
+        DispatchQueue.main.async {
+            uiViewController.present(activityVC, animated: true)
+        }
+    }
+}
 
 struct SettingsView: View {
     @EnvironmentObject var dataManager: DataManager
     @State private var tempSettings: Settings
     @State private var showingIncomeManagement = false
     @State private var showingInvestmentManagement = false
+
+    // Export / Import state
+    @State private var exportURL: URL? = nil
+    @State private var showingShareSheet = false
+    @State private var showingImporter = false
+    @State private var pendingImportURL: URL? = nil
+    @State private var showingImportConfirmation = false
+    @State private var showingImportSuccess = false
+    @State private var errorMessage: String? = nil
 
     
     init() {
@@ -64,6 +114,52 @@ struct SettingsView: View {
                     .listRowBackground(AppTheme.Colors.cardBackground)
                 }
                 
+                Section(header: Text("Data Transfer")
+                    .font(AppTheme.Fonts.caption(13))
+                    .foregroundColor(AppTheme.Colors.secondaryText)) {
+
+                    Button {
+                        do {
+                            exportURL = try dataManager.exportAllData()
+                            showingShareSheet = true
+                        } catch {
+                            errorMessage = error.localizedDescription
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(AppTheme.Colors.electricCyan)
+                            Text("Export Data")
+                                .font(AppTheme.Fonts.body())
+                                .foregroundColor(AppTheme.Colors.primaryText)
+                        }
+                    }
+                    .listRowBackground(AppTheme.Colors.cardBackground)
+
+                    Text("Exports all data as a JSON file you can share or save.")
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .font(AppTheme.Fonts.caption())
+                        .listRowBackground(AppTheme.Colors.cardBackground)
+
+                    Button {
+                        showingImporter = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "square.and.arrow.down")
+                                .foregroundColor(AppTheme.Colors.emerald)
+                            Text("Import Data")
+                                .font(AppTheme.Fonts.body())
+                                .foregroundColor(AppTheme.Colors.primaryText)
+                        }
+                    }
+                    .listRowBackground(AppTheme.Colors.cardBackground)
+
+                    Text("Replaces all current data with a previously exported file.")
+                        .foregroundColor(AppTheme.Colors.secondaryText)
+                        .font(AppTheme.Fonts.caption())
+                        .listRowBackground(AppTheme.Colors.cardBackground)
+                }
+
                 Section(header: Text("Notifications")
                     .font(AppTheme.Fonts.caption(13))
                     .foregroundColor(AppTheme.Colors.secondaryText)) {
@@ -105,6 +201,56 @@ struct SettingsView: View {
             }
             .sheet(isPresented: $showingInvestmentManagement) {
                 InvestmentManagementView()
+            }
+            .background(
+                Group {
+                    if showingShareSheet, let url = exportURL {
+                        ShareSheetPresenter(items: [url], isPresented: $showingShareSheet)
+                    }
+                }
+            )
+            .fileImporter(
+                isPresented: $showingImporter,
+                allowedContentTypes: [UTType.json]
+            ) { result in
+                switch result {
+                case .success(let url):
+                    pendingImportURL = url
+                    showingImportConfirmation = true
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                }
+            }
+            .alert("Replace All Data?", isPresented: $showingImportConfirmation) {
+                Button("Import", role: .destructive) {
+                    if let url = pendingImportURL {
+                        do {
+                            try dataManager.importAllData(from: url)
+                            showingImportSuccess = true
+                        } catch {
+                            errorMessage = error.localizedDescription
+                        }
+                        pendingImportURL = nil
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingImportURL = nil
+                }
+            } message: {
+                Text("This will replace all your current data with the imported file. This cannot be undone.")
+            }
+            .alert("Import Successful", isPresented: $showingImportSuccess) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("All your data has been restored successfully.")
+            }
+            .alert("Error", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(errorMessage ?? "")
             }
         }
     }

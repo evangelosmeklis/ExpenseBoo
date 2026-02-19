@@ -399,6 +399,52 @@ class DataManager: ObservableObject {
         return manualPLs.first { $0.month == month && $0.year == year }
     }
 
+    // MARK: - Export / Import
+    func exportAllData() throws -> URL {
+        let exportData = ExportData(
+            version: 1,
+            exportDate: Date(),
+            expenses: expenses,
+            categories: categories,
+            incomes: incomes,
+            investments: investments,
+            subscriptions: subscriptions,
+            manualPLs: manualPLs,
+            settings: settings
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = .prettyPrinted
+        let data = try encoder.encode(exportData)
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let fileName = "ExpenseBoo_\(formatter.string(from: Date())).json"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        try data.write(to: url)
+        return url
+    }
+
+    func importAllData(from url: URL) throws {
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if accessing { url.stopAccessingSecurityScopedResource() }
+        }
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let exportData = try decoder.decode(ExportData.self, from: data)
+
+        expenses = exportData.expenses
+        categories = exportData.categories
+        incomes = exportData.incomes
+        investments = exportData.investments
+        subscriptions = exportData.subscriptions
+        manualPLs = exportData.manualPLs
+        settings = exportData.settings
+        saveData()
+    }
+
     // MARK: - Yearly Statistics
     func getYearlyStats(for year: Int) -> YearlyStats {
         let monthlyStats = getMonthlyStats(for: year)

@@ -251,3 +251,15 @@ struct YearlyStats {
     let bestMonthPL: Double
     let worstMonthPL: Double
 }
+
+struct ExportData: Codable {
+    let version: Int
+    let exportDate: Date
+    let expenses: [Expense]
+    let categories: [Category]
+    let incomes: [Income]
+    let investments: [Investment]
+    let subscriptions: [Subscription]
+    let manualPLs: [ManualPL]
+    let settings: Settings
+}
